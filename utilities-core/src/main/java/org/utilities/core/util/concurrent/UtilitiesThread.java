@@ -6,6 +6,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.function.Supplier;
 
 import org.utilities.core.lang.exception.QuietException;
 import org.utilities.core.lang.iterable.IterablePipe;
@@ -28,7 +29,7 @@ public class UtilitiesThread {
 		runner.shutdown(wait);
 	}
 
-	public static <T> List<T> callParallel(Iterable<Callable<T>> tasks) {
+	public static <T> List<T> callParallel(Iterable<? extends Callable<T>> tasks) {
 		ParallelCaller<T> caller = new ParallelCaller<>();
 		caller.submitAll(tasks);
 		return caller.get();
@@ -45,14 +46,24 @@ public class UtilitiesThread {
 	}
 
 	public static void wait(ExecutorService pool) throws QuietException {
-		wait(pool, 1000);
+		wait(pool, 100);
 	}
 
 	public static void wait(ExecutorService pool, long sleepMillis) throws QuietException {
 		if (!pool.isShutdown()) {
 			pool.shutdown();
 		}
-		while (!pool.isTerminated()) {
+		wait(pool::isTerminated, sleepMillis);
+	}
+
+	public static void wait(Supplier<Boolean> semaphore) throws QuietException {
+		while (!semaphore.get()) {
+			UtilitiesThread.sleepQuietly(100);
+		}
+	}
+
+	public static void wait(Supplier<Boolean> semaphore, long sleepMillis) throws QuietException {
+		while (!semaphore.get()) {
 			UtilitiesThread.sleepQuietly(sleepMillis);
 		}
 	}

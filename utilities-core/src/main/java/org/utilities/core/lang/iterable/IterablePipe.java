@@ -71,7 +71,8 @@ public interface IterablePipe<T> extends Iterable<T> {
 		return flatMap(BiFunctionPlus.parseFunction(mapper, u));
 	}
 
-	public default <U, R> IterablePipeFlat<R> flatMap(BiFunction<T, U, Iterable<R>> mapper, Function<T, ? extends U> u) {
+	public default <U, R> IterablePipeFlat<R> flatMap(BiFunction<T, U, Iterable<R>> mapper,
+			Function<T, ? extends U> u) {
 		return flatMap(BiFunctionPlus.parseFunction(mapper, u));
 	}
 
@@ -95,7 +96,6 @@ public interface IterablePipe<T> extends Iterable<T> {
 		return new IterablePipeTracker<>(this, tracker).batch((Predicate<T>) semaphore);
 	}
 
-	// FIXME validate if the correct method is called.
 	public default IterablePipeBatch<T> batch(IterablePipeTracker.Tracker.Predicate<T> semaphore) {
 		return batch(semaphore, semaphore);
 	}
@@ -194,8 +194,14 @@ public interface IterablePipe<T> extends Iterable<T> {
 		return Pipeline.newInstance(this);
 	}
 
-	public default IterablePipeCache<T> cache(int bufferSize) {
-		return new IterablePipeCache<>(this, bufferSize);
+	public default IterablePipeCache<T> cache() {
+		return new IterablePipeCache<T>(this);
+	}
+
+	public default IterablePipe<T> cache(int bufferSize) {
+		return this.tuples(bufferSize)
+				.cache()
+				.flatMap(Function.identity());
 	}
 
 }

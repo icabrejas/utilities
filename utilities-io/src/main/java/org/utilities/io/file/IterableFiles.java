@@ -9,11 +9,11 @@ import org.utilities.core.lang.iterable.IterablePipeFlat;
 
 public class IterableFiles extends IterablePipeFlat<File> {
 
-	public IterableFiles(File... src) {
+	private IterableFiles(File... src) {
 		super(() -> new It(src));
 	}
 
-	public static IterableFiles newInstance(File... src) {
+	public static IterableFiles newInstance(File src) {
 		return new IterableFiles(src);
 	}
 
@@ -36,8 +36,11 @@ public class IterableFiles extends IterablePipeFlat<File> {
 			if (!hasNext()) {
 				throw new NoSuchElementException();
 			}
-			File next = src.next();
-			return !next.isDirectory() ? Arrays.asList(next) : new IterableFiles(next.listFiles());
+			return iterable(src.next());
+		}
+
+		private Iterable<File> iterable(File file) {
+			return file.isDirectory() ? new IterableFiles(file.listFiles()) : Arrays.asList(file);
 		}
 
 	}

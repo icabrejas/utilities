@@ -1,5 +1,7 @@
 package org.utilities.core.lang.runtime;
 
+import org.utilities.core.util.concurrent.UtilitiesThread;
+
 public class UtilitiesRuntime {
 
 	public static int availableProcessors() {
@@ -7,8 +9,13 @@ public class UtilitiesRuntime {
 				.availableProcessors();
 	}
 
-	public static Memory monitoryMemory() {
+	public static Memory memoryMonitor() {
 		return new Memory();
+	}
+
+	public static void monitoryMemory(long timeoutPeriod) {
+		Memory memory = new Memory();
+		UtilitiesThread.setTimeout(() -> System.out.println(memory), timeoutPeriod);
 	}
 
 	public static class Memory {

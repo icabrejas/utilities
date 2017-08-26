@@ -10,27 +10,27 @@ public class UtilitiesString {
 		return Character.compare(a.charAt(i), b.charAt(i));
 	}
 
-	public static List<String> paste(String a, Iterable<String> b, String sep) {
+	public static List<String> paste(Object a, Iterable<?> b, String sep) {
 		return IterablePipe.newInstance(b)
 				.map(b_ -> a + sep + b_)
 				.toList();
 	}
 
-	public static List<String> paste(Iterable<String> a, String b, String sep) {
+	public static List<String> paste(Iterable<?> a, Object b, String sep) {
 		return IterablePipe.newInstance(a)
 				.map(a_ -> a_ + sep + b)
 				.toList();
 	}
 
-	public static List<String> paste0(String a, Iterable<String> b) {
+	public static List<String> paste0(Object a, Iterable<?> b) {
 		return paste(a, b, "");
 	}
 
-	public static List<String> paste0(Iterable<String> a, String b) {
+	public static List<String> paste0(Iterable<?> a, Object b) {
 		return paste(a, b, "");
 	}
 
-	public static String paste(Iterable<String> parts, String sep) {
+	public static String paste(Iterable<?> parts, String sep) {
 		StringBuilder builder = new StringBuilder();
 		for (Object part : parts) {
 			builder.append(part + sep);

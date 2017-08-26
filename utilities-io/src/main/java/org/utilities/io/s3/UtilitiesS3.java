@@ -23,27 +23,30 @@ public class UtilitiesS3 {
 	public static final String DELIMITER = "/";
 
 	public static AmazonS3 newS3Client(String accessKey, String secretKey) {
-		AWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
-		AWSCredentialsProvider credentialsProvider = new AWSStaticCredentialsProvider(credentials);
+		AWSCredentialsProvider credentialsProvider = newCredentialsProvider(accessKey, secretKey);
 		return AmazonS3ClientBuilder.standard()
 				.withCredentials(credentialsProvider)
 				.withRegion(Regions.EU_WEST_1)
 				.build();
 	}
 
+	public static AWSCredentialsProvider newCredentialsProvider(String accessKey, String secretKey) {
+		AWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
+		return new AWSStaticCredentialsProvider(credentials);
+	}
+
 	public static S3Object get(GetObjectRequest request, AmazonS3 s3Client) {
 		return s3Client.getObject(request);
 	}
 
-	public static S3Object get(S3ObjectSummary objectSummary, AmazonS3 s3Client) {
-		String bucketName = objectSummary.getBucketName();
-		String key = objectSummary.getKey();
-		return get(bucketName, key, s3Client);
+	public static S3Object get(S3ObjectSummary summary, AmazonS3 s3Client) {
+		String bucketName = summary.getBucketName();
+		String key = summary.getKey();
+		return get(s3Client, bucketName, key);
 	}
 
-	public static S3Object get(String bucketName, String key, AmazonS3 s3Client) {
-		GetObjectRequest request = new GetObjectRequest(bucketName, key);
-		return s3Client.getObject(request);
+	public static S3Object get(AmazonS3 s3Client, String bucketName, String key) {
+		return s3Client.getObject(bucketName, key);
 	}
 
 	public static IterableS3 getAll(AmazonS3 s3Client, Supplier<ListObjectsV2Request> request) {

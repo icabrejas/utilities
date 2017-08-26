@@ -29,7 +29,7 @@ public class ParallelCaller<T> implements Iterable<T> {
 		return submitAll(Arrays.asList(tasks));
 	}
 
-	public ParallelCaller<T> submitAll(Iterable<Callable<T>> tasks) {
+	public ParallelCaller<T> submitAll(Iterable<? extends Callable<T>> tasks) {
 		for (Callable<T> task : tasks) {
 			submit(task);
 		}
