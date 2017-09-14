@@ -13,6 +13,10 @@ public interface FunctionPlus<T, R> extends Function<T, R> {
 		return newInstance(Function.super.andThen(after));
 	}
 
+	default <U, V> FunctionPlus<T, V> andThen(BiFunctionPlus<? super R, ? super U, ? extends V> after, U u) {
+		return andThen(after.parseFunction(u));
+	}
+
 	default <U, V> FunctionPlus<T, V> andThen(BiFunction<R, U, V> after, U u) {
 		return andThen(BiFunctionPlus.parseFunction(after, u));
 	}
@@ -24,6 +28,10 @@ public interface FunctionPlus<T, R> extends Function<T, R> {
 
 	public static <T, R, U> FunctionPlus<T, U> compose(Function<R, U> g, Function<T, R> f) {
 		return newInstance(g.compose(f));
+	}
+
+	default <U, V> Function<U, R> compose(BiFunctionPlus<? super U, ? super V, ? extends T> before, V v) {
+		return compose(before.parseFunction(v));
 	}
 
 	public static <T, R> FunctionPlus<T, R> newInstance(Function<T, R> function) {

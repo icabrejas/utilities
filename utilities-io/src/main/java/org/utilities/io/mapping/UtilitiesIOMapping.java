@@ -4,6 +4,9 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import org.apache.commons.lang3.ArrayUtils;
+import org.utilities.core.dataframe.MapDataEntry;
+import org.utilities.core.dataframe.entry.value.DataValue;
 import org.utilities.core.lang.exception.QuietException;
 import org.utilities.core.lang.iterable.timeseries.Event;
 import org.utilities.core.time.Unixtime;
@@ -153,72 +156,67 @@ public class UtilitiesIOMapping {
 
 	public static class CSV {
 
-		public static <I> Function<EntryCSVString<I>, Event<I, Double>> parseEventMapper(String datetimeLabel,
-				String pattern) {
+		public static <I> Function<EntryCSVString<I>, Event<I>> parseEventMapper(String datetimeLabel, String pattern) {
 			return parseEventMapper(datetimeLabel, UtilitiesTime.unixParser(pattern));
 		}
 
-		public static <I> Function<EntryCSVString<I>, Event<I, Double>> parseEventMapper(String datetimeLabel) {
+		public static <I> Function<EntryCSVString<I>, Event<I>> parseEventMapper(String datetimeLabel) {
 			return parseEventMapper(datetimeLabel, Long::parseLong);
 		}
 
-		public static <I> Function<EntryCSVString<I>, Event<I, Double>> parseEventMapper(String datetimeLabel,
+		public static <I> Function<EntryCSVString<I>, Event<I>> parseEventMapper(String datetimeLabel,
 				Function<String, Long> unixtime) {
 			return entry -> parseEvent(entry, datetimeLabel, unixtime);
 		}
 
-		public static <I> Event<I, Double> parseEvent(EntryCSVString<I> entry, String datetimeLabel,
+		public static <I> Event<I> parseEvent(EntryCSVString<I> entry, String datetimeLabel,
 				Function<String, Long> unixtime) {
 			I metainfo = entry.getMetainfo();
 			String dateTime = entry.getString(datetimeLabel);
 			Unixtime unixtime_ = Unixtime.newInstanceUnix(unixtime.apply(dateTime));
-			Event<I, Double> evt = new Event<I, Double>(metainfo, unixtime_);
-			for (String header : entry.getHeaders()) {
-				if (!header.equals(datetimeLabel)) {
-					String field = entry.getString(header);
-					if (!field.isEmpty()) {
-						double value = Double.parseDouble(field);
-						if (!Double.isNaN(value)) {
-							evt.put(header, value);
-						}
-					}
-				}
-			}
+			Event<I> evt = new Event<I>(metainfo, unixtime_);
+			put(entry, evt, datetimeLabel);
 			return evt;
 		}
 
-		public static <I> Function<EntryCSVString<I>, Event<I, Double>> parseEventMapper(String dateLabel,
-				String timeLabel, String pattern) {
+		public static <I> Function<EntryCSVString<I>, Event<I>> parseEventMapper(String dateLabel, String timeLabel,
+				String pattern) {
 			return parseEventMapper(dateLabel, timeLabel, " ", pattern);
 		}
 
-		public static <I> Function<EntryCSVString<I>, Event<I, Double>> parseEventMapper(String dateLabel,
-				String timeLabel, String separator, String pattern) {
+		public static <I> Function<EntryCSVString<I>, Event<I>> parseEventMapper(String dateLabel, String timeLabel,
+				String separator, String pattern) {
 			Function<String, Long> parser = UtilitiesTime.unixParser(pattern);
 			return parseEventMapper(dateLabel, timeLabel, (_date, _time) -> parser.apply(_date + separator + _time));
 		}
 
-		public static <I> Function<EntryCSVString<I>, Event<I, Double>> parseEventMapper(String dateLabel,
-				String timeLabel, BiFunction<String, String, Long> unixtime) {
+		public static <I> Function<EntryCSVString<I>, Event<I>> parseEventMapper(String dateLabel, String timeLabel,
+				BiFunction<String, String, Long> unixtime) {
 			return entry -> parseEvent(entry, dateLabel, timeLabel, unixtime);
 		}
 
-		public static <I> Event<I, Double> parseEvent(EntryCSVString<I> entry, String dateLabel, String timeLabel,
+		public static <I> Event<I> parseEvent(EntryCSVString<I> entry, String dateLabel, String timeLabel,
 				BiFunction<String, String, Long> unixtime) {
 			I metainfo = entry.getMetainfo();
 			String date = entry.getString(dateLabel);
 			String time = entry.getString(timeLabel);
 			Unixtime unixtime_ = Unixtime.newInstanceUnix(unixtime.apply(date, time));
-			Event<I, Double> evt = new Event<I, Double>(metainfo, unixtime_);
-			for (String header : entry.getHeaders()) {
-				if (!header.equals(dateLabel) && !header.equals(timeLabel)) {
-					String field = entry.getString(header);
-					if (field.isEmpty()) {
-						evt.put(header, Double.parseDouble(field));
+			Event<I> evt = new Event<I>(metainfo, unixtime_);
+			put(entry, evt, dateLabel, timeLabel);
+			return evt;
+		}
+
+		private static <I> void put(EntryCSVString<I> entry, Event<I> evt, String... remove) {
+			MapDataEntry values = new MapDataEntry();
+			for (String label : entry.names()) {
+				if (!ArrayUtils.contains(remove, label)) {
+					DataValue value = entry.get(label);
+					if (value != null) {
+						values.put(label, value);
 					}
 				}
 			}
-			return evt;
+			evt.values(values);
 		}
 
 	}

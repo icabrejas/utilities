@@ -4,35 +4,34 @@ import java.util.function.Predicate;
 
 import org.utilities.core.lang.iterable.timeseries.Event;
 
-public interface EventFilter<I, V> extends Predicate<Event<I, V>> {
+public interface EventFilter<I> extends Predicate<Event<I>> {
 
-	public static <I, V> EventFilter<I, V> newInstance(Predicate<Event<I, V>> filter) {
+	public static <I> EventFilter<I> newInstance(Predicate<Event<I>> filter) {
 		return filter::test;
 	}
 
-	public static <I, V> EventFilter<I, V> and(EventFilter<I, V> a, EventFilter<I, V> b) {
+	public static <I> EventFilter<I> and(EventFilter<I> a, EventFilter<I> b) {
 		return a.and(b);
 	}
 
-	public static <I, V> EventFilter<I, V> or(EventFilter<I, V> a, EventFilter<I, V> b) {
+	public static <I> EventFilter<I> or(EventFilter<I> a, EventFilter<I> b) {
 		return a.or(b);
 	}
 
-	default EventFilter<I, V> and(EventFilter<I, V> filter) {
+	default EventFilter<I> and(EventFilter<I> filter) {
 		return evt -> test(evt) && filter.test(evt);
 	}
 
-	default EventFilter<I, V> or(EventFilter<I, V> filter) {
+	default EventFilter<I> or(EventFilter<I> filter) {
 		return evt -> test(evt) || filter.test(evt);
 	}
 
-	default EventFilter<I, V> negate() {
+	default EventFilter<I> negate() {
 		return evt -> !test(evt);
 	}
 
-	public static <I, V>EventFilter<I, V> newInstance(Class<I> info, Class<V> value) {
+	public static <I> EventFilter<I> newInstance(Class<I> info) {
 		return evt -> true;
 	}
-	
 
 }

@@ -1,6 +1,7 @@
 package org.utilities.core.util.list;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.ToDoubleBiFunction;
@@ -33,10 +34,10 @@ public class UtilitiesList {
 	}
 
 	@SafeVarargs
-	public static <T> List<T> concat(List<T>... lists) {
+	public static <T> List<T> concat(Collection<T>... data) {
 		List<T> all = new ArrayList<>();
-		for (List<T> list : lists) {
-			all.addAll(list);
+		for (Collection<T> x : data) {
+			all.addAll(x);
 		}
 		return all;
 	}

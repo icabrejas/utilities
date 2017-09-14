@@ -1,47 +1,48 @@
 package org.utilities.core.lang.iterable.timeseries.filters;
 
+import org.utilities.core.lang.iterable.filter.IterableFilter;
 import org.utilities.core.lang.iterable.timeseries.Event;
 import org.utilities.core.time.Unixtime;
 
 public class EventFilterTime {
 
-	public static <I, V> EventFilter<I, V> isEquals(long unixtime) {
+	public static <I> IterableFilter<Event<I>> isEquals(long unixtime) {
 		return new Equals<>(unixtime);
 	}
 
-	public static <I, V> EventFilter<I, V> isEquals(int field, int value) {
+	public static <I> IterableFilter<Event<I>> isEquals(int field, int value) {
 		return new FieldEquals<>(field, value);
 	}
 
-	public static <I, V extends Comparable<V>> EventFilter<I, V> isHigher(long unixtime) {
+	public static <I> IterableFilter<Event<I>> isHigher(long unixtime) {
 		return new Higher<>(unixtime);
 	}
 
-	public static <I, V extends Comparable<V>> EventFilter<I, V> isHigherOrEquals(long unixtime) {
-		EventFilter<I, V> higher = isHigher(unixtime);
+	public static <I> IterableFilter<Event<I>> isHigherOrEquals(long unixtime) {
+		IterableFilter<Event<I>> higher = isHigher(unixtime);
 		return higher.or(isEquals(unixtime));
 	}
 
-	public static <I, V extends Comparable<V>> EventFilter<I, V> isLower(long unixtime) {
-		return new Lower<I, V>(unixtime);
+	public static <I> IterableFilter<Event<I>> isLower(long unixtime) {
+		return new Lower<I>(unixtime);
 	}
 
-	public static <I, V extends Comparable<V>> EventFilter<I, V> isLowerOrEquals(long unixtime) {
-		EventFilter<I, V> lower = isLower(unixtime);
+	public static <I> IterableFilter<Event<I>> isLowerOrEquals(long unixtime) {
+		IterableFilter<Event<I>> lower = isLower(unixtime);
 		return lower.or(isEquals(unixtime));
 	}
 
-	public static <I, V extends Comparable<V>> EventFilter<I, V> isBetween(long from, long to) {
-		EventFilter<I, V> higher = isHigher(from);
+	public static <I> IterableFilter<Event<I>> isBetween(long from, long to) {
+		IterableFilter<Event<I>> higher = isHigher(from);
 		return higher.and(isLower(to));
 	}
 
-	public static <I, V extends Comparable<V>> EventFilter<I, V> isBetweenOrEquals(long from, long to) {
-		EventFilter<I, V> higher = isHigherOrEquals(from);
+	public static <I> IterableFilter<Event<I>> isBetweenOrEquals(long from, long to) {
+		IterableFilter<Event<I>> higher = isHigherOrEquals(from);
 		return higher.and(isLowerOrEquals(to));
 	}
 
-	public static class Equals<I, V> implements EventFilter<I, V> {
+	public static class Equals<I> implements IterableFilter<Event<I>> {
 
 		private Unixtime unixtime;
 
@@ -50,13 +51,13 @@ public class EventFilterTime {
 		}
 
 		@Override
-		public boolean test(Event<I, V> evt) {
+		public boolean test(Event<I> evt) {
 			return unixtime.equals(evt.getUnixtime());
 		}
 
 	}
 
-	public static class Lower<I, V> implements EventFilter<I, V> {
+	public static class Lower<I> implements IterableFilter<Event<I>> {
 
 		private Unixtime unixtime;
 
@@ -65,13 +66,13 @@ public class EventFilterTime {
 		}
 
 		@Override
-		public boolean test(Event<I, V> evt) {
+		public boolean test(Event<I> evt) {
 			return 0 < unixtime.compareTo(evt.getUnixtime());
 		}
 
 	}
 
-	public static class Higher<I, V> implements EventFilter<I, V> {
+	public static class Higher<I> implements IterableFilter<Event<I>> {
 
 		private Unixtime unixtime;
 
@@ -80,13 +81,13 @@ public class EventFilterTime {
 		}
 
 		@Override
-		public boolean test(Event<I, V> evt) {
+		public boolean test(Event<I> evt) {
 			return unixtime.compareTo(evt.getUnixtime()) < 0;
 		}
 
 	}
 
-	public static class FieldEquals<I, V> implements EventFilter<I, V> {
+	public static class FieldEquals<I> implements IterableFilter<Event<I>> {
 
 		private int field;
 		private int value;
@@ -97,7 +98,7 @@ public class EventFilterTime {
 		}
 
 		@Override
-		public boolean test(Event<I, V> evt) {
+		public boolean test(Event<I> evt) {
 			return value == evt.getUnixtime()
 					.get(field);
 		}

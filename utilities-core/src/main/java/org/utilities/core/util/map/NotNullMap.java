@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
 
+// FIXME remove (use map.computeIfAbsent(key, k->new ArrayList<>()))
 public class NotNullMap<K, V> {
 
 	private Map<K, V> map;
@@ -35,5 +36,5 @@ public class NotNullMap<K, V> {
 	public void clear() {
 		map.clear();
 	}
-	
+
 }

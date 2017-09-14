@@ -1,108 +1,109 @@
 package org.utilities.core.lang.iterable.timeseries.filters;
 
+import org.utilities.core.dataframe.entry.value.DataValue;
 import org.utilities.core.lang.iterable.timeseries.Event;
 
-public abstract class EventFilterValue<I, V> implements EventFilter<I, V> {
+public abstract class EventFilterValue<I> implements EventFilter<I> {
 
-	private String label;
-	private V value;
+	private String name;
+	private DataValue value;
 
-	protected EventFilterValue(String label, V value) {
-		this.label = label;
+	protected EventFilterValue(String name, DataValue value) {
+		this.name = name;
 		this.value = value;
 	}
 
-	public String getLabel() {
-		return label;
+	public String getName() {
+		return name;
 	}
 
-	public V getValue() {
+	public DataValue getValue() {
 		return value;
 	}
 
-	public static <I, V> EventFilter<I, V> isNull(String label) {
-		return isEquals(label, null);
+	public static <I> EventFilter<I> isNull(String name) {
+		return isEquals(name, null);
 	}
 
-	public static <I, V> EventFilter<I, V> isNotNull(String label) {
-		EventFilter<I, V> filter = isNull(label);
+	public static <I> EventFilter<I> isNotNull(String name) {
+		EventFilter<I> filter = isNull(name);
 		return filter.negate();
 	}
 
-	public static <I, V> EventFilter<I, V> isEquals(String label, V value) {
-		return new Equals<>(label, value);
+	public static <I> EventFilter<I> isEquals(String name, DataValue value) {
+		return new Equals<>(name, value);
 	}
 
-	public static <I, V> EventFilter<I, V> isNotEquals(String label, V value) {
-		EventFilter<I, V> filter = isEquals(label, value);
+	public static <I> EventFilter<I> isNotEquals(String name, DataValue value) {
+		EventFilter<I> filter = isEquals(name, value);
 		return filter.negate();
 	}
 
-	public static <I, V extends Comparable<V>> EventFilter<I, V> isHigher(String label, V value) {
-		return new Higher<>(label, value);
+	public static <I> EventFilter<I> isHigher(String name, DataValue value) {
+		return new Higher<>(name, value);
 	}
 
-	public static <I, V extends Comparable<V>> EventFilter<I, V> isHigherOrEquals(String label, V value) {
-		return EventFilter.or(isHigher(label, value), isEquals(label, value));
+	public static <I> EventFilter<I> isHigherOrEquals(String name, DataValue value) {
+		return EventFilter.or(isHigher(name, value), isEquals(name, value));
 	}
 
-	public static <I, V extends Comparable<V>> EventFilter<I, V> isLower(String label, V value) {
-		return new Lower<>(label, value);
+	public static <I> EventFilter<I> isLower(String name, DataValue value) {
+		return new Lower<>(name, value);
 	}
 
-	public static <I, V extends Comparable<V>> EventFilter<I, V> isLowerOrEquals(String label, V value) {
-		return EventFilter.or(isLower(label, value), isEquals(label, value));
+	public static <I> EventFilter<I> isLowerOrEquals(String name, DataValue value) {
+		return EventFilter.or(isLower(name, value), isEquals(name, value));
 	}
 
-	public static <I, V extends Comparable<V>> EventFilter<I, V> isBetween(String label, V min, V max) {
-		return EventFilter.and(isHigher(label, min), isLower(label, max));
+	public static <I> EventFilter<I> isBetween(String name, DataValue min, DataValue max) {
+		return EventFilter.and(isHigher(name, min), isLower(name, max));
 	}
 
-	public static <I, V extends Comparable<V>> EventFilter<I, V> isBetweenOrEquals(String label, V min, V max) {
-		return EventFilter.and(isHigherOrEquals(label, min), isLowerOrEquals(label, max));
+	public static <I> EventFilter<I> isBetweenOrEquals(String name, DataValue min, DataValue max) {
+		return EventFilter.and(isHigherOrEquals(name, min), isLowerOrEquals(name, max));
 	}
 
-	public static class Equals<I, V> extends EventFilterValue<I, V> {
+	public static class Equals<I> extends EventFilterValue<I> {
 
-		public Equals(String label, V value) {
-			super(label, value);
+		public Equals(String name, DataValue value) {
+			super(name, value);
 		}
 
 		@Override
-		public boolean test(Event<I, V> evt) {
-			String label = getLabel();
-			V value = getValue();
-			return value == null ? evt.get(label) == null : value.equals(evt.get(label));
+		public boolean test(Event<I> evt) {
+			String name = getName();
+			DataValue value = getValue();
+			return value == null ? evt.get(name) == null : value.equals(evt.get(name));
 		}
 
 	}
 
-	public static class Lower<I, V extends Comparable<V>> extends EventFilterValue<I, V> {
+	public static class Lower<I> extends EventFilterValue<I> {
 
-		public Lower(String label, V value) {
-			super(label, value);
+		public Lower(String name, DataValue value) {
+			super(name, value);
 		}
 
 		@Override
-		public boolean test(Event<I, V> evt) {
-			String label = getLabel();
-			V value = getValue();
-			return evt.get(label) != null && 0 < value.compareTo(evt.get(label));
+		public boolean test(Event<I> evt) {
+			String name = getName();
+			DataValue value = getValue();
+			return evt.get(name) != null && 0 < value.compareTo(evt.get(name));
 		}
 
 	}
 
-	public static class Higher<I, V extends Comparable<V>> extends EventFilterValue<I, V> {
+	public static class Higher<I> extends EventFilterValue<I> {
 
-		public Higher(String label, V value) {
-			super(label, value);
+		public Higher(String name, DataValue value) {
+			super(name, value);
 		}
 
 		@Override
-		public boolean test(Event<I, V> evt) {
-			String label = getLabel();
-			V value = getValue();
-			return evt.get(label) != null && value.compareTo(evt.get(label)) < 0;
+		public boolean test(Event<I> evt) {
+			String name = getName();
+			DataValue value = getValue();
+			return evt.get(name) != null && value.compareTo(evt.get(name)) < 0;
 		}
 
 	}

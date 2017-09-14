@@ -1,25 +1,26 @@
 package org.utilities.core.lang.iterable.timeseries;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
-import org.utilities.core.lang.iterable.Entry;
-import org.utilities.core.lang.iterable.timeseries.simple.SimpleEvent;
+import org.utilities.core.dataframe.MapDataEntry;
+import org.utilities.core.dataframe.Mutation;
+import org.utilities.core.dataframe.entry.DataEntry;
+import org.utilities.core.dataframe.entry.value.DataValue;
 import org.utilities.core.time.Unixtime;
-import org.utilities.core.time.UtilitiesTime;
 
-public class Event<I, V> implements Iterable<Entry<String, V>> {
+public class Event<I> implements DataEntry {
 
 	private I metainfo;
+	// TODO ¿is the correct class (maybe this class is unnecessary)?
 	private Unixtime unixtime;
-	private Map<String, V> values = new HashMap<>();
+	private DataEntry values = new MapDataEntry();
 
 	public Event(I metainfo, Unixtime unixtime) {
 		this.metainfo = metainfo;
@@ -34,6 +35,10 @@ public class Event<I, V> implements Iterable<Entry<String, V>> {
 		return unixtime;
 	}
 
+	public DataEntry getValues() {
+		return values;
+	}
+
 	public long getTimeInMillis() {
 		return unixtime.getTimeInMillis();
 	}
@@ -42,162 +47,142 @@ public class Event<I, V> implements Iterable<Entry<String, V>> {
 		return unixtime.getTimeInUnix();
 	}
 
-	public Map<String, V> getValues() {
-		return values;
-	}
-
-	public void setValues(Map<String, V> values) {
+	public Event<I> values(DataEntry values) {
 		this.values = values;
-	}
-
-	public V get(String label) {
-		return values.get(label);
-	}
-
-	public void put(String label, V value) {
-		values.put(label, value);
-	}
-
-	public Set<String> labels() {
-		return values.keySet();
-	}
-
-	public int dim() {
-		return values.size();
-	}
-
-	public Event<I, V> select(String... labels) {
-		Event<I, V> selected = new Event<>(metainfo, unixtime);
-		for (String label : values.keySet()) {
-			if (-1 < Arrays.binarySearch(labels, label)) {
-				selected.put(label, values.get(label));
-			}
-		}
-		return selected;
-	}
-
-	public Event<I, V> select(List<String> labels) {
-		Event<I, V> selected = new Event<>(metainfo, unixtime);
-		for (String label : values.keySet()) {
-			if (labels.contains(label)) {
-				selected.put(label, values.get(label));
-			}
-		}
-		return selected;
-	}
-
-	public List<SimpleEvent<I, V>> gather() {
-		List<SimpleEvent<I, V>> events = new ArrayList<>();
-		for (String label : values.keySet()) {
-			SimpleEvent<I, V> evt = new SimpleEvent<>();
-			evt.setMetainfo(metainfo);
-			evt.setUnixtime(unixtime);
-			evt.setLabel(label);
-			evt.setValue(values.get(label));
-			events.add(evt);
-		}
-		return events;
+		return this;
 	}
 
 	@Override
-	public Iterator<Entry<String, V>> iterator() {
-		return values.entrySet()
+	public Collection<String> names() {
+		return values.names();
+	}
+
+	@Override
+	public DataValue get(String name) {
+		return values.get(name);
+	}
+
+	private Event<I> newInstance(DataEntry values) {
+		return new Event<I>(metainfo, unixtime).values(values);
+	}
+
+	@Override
+	public Event<I> remove(Collection<String> names) {
+		return newInstance(values.remove(names));
+	}
+
+	@Override
+	public Event<I> remove(String... names) {
+		return newInstance(values.remove(names));
+	}
+
+	@Override
+	public <T> Event<I> mutate(Mutation mutation) {
+		return newInstance(values.mutate(mutation));
+	}
+
+	@Override
+	public <T> Event<I> mutate(String name, Function<DataEntry, DataValue> func) {
+		return newInstance(values.mutate(name, func));
+	}
+
+	@Override
+	public <T> Event<I> mutate(String name, String x, Function<DataValue, DataValue> func) {
+		return newInstance(values.mutate(name, x, func));
+	}
+
+	@Override
+	public <T> Event<I> mutate(String name, String x, String y, BiFunction<DataValue, DataValue, DataValue> func) {
+		return newInstance(values.mutate(name, x, y, func));
+	}
+
+	@Override
+	public List<? extends DataEntry> gather(String key, String value, String... names) {
+		return gather(key, value, Arrays.asList(names));
+	}
+
+	@Override
+	public List<? extends DataEntry> gather(String key, String value, Collection<String> names) {
+		return values.gather(key, value, names)
 				.stream()
-				.map(entry -> Entry.newInstance(entry::getKey, entry::getValue))
-				.iterator();
+				.map(this::newInstance)
+				.collect(Collectors.toList());
 	}
 
-	public static <I, V> Comparator<Event<I, V>> byTimeComparator() {
-		return byTimeComparator();
+	@Override
+	public DataEntry gather(String key, String value, String name) {
+		return newInstance(values.gather(key, value, name));
 	}
 
-	public static <I, V> Comparator<Event<I, V>> byTimeComparator(Class<I> info, Class<V> value) {
+	public static List<Event<String>> bind(Collection<Event<String>> events, String metainfo) {
+		return events.stream()
+				.collect(Collectors.groupingBy(Event::getUnixtime))
+				.entrySet()
+				.stream()
+				.map(entry -> Event.bind(entry.getValue(), metainfo, entry.getKey()))
+				.collect(Collectors.toList());
+	}
+
+	private static Event<String> bind(Collection<Event<String>> events, String metainfo, Unixtime unixtime) {
+		Map<String, DataEntry> entries = events.stream()
+				.collect(Collectors.toMap(Event::getMetainfo, Event::getValues));
+		DataEntry values = DataEntry.bind(entries);
+		return new Event<String>(metainfo, unixtime).values(values);
+	}
+
+	// ---------------------------------------
+
+	// FIXME
+	// public static <I, V> Event<I, V> spread(List<SimpleEvent<I, V>> events) {
+	// SimpleEvent<I, V> first = events.get(0);
+	// Event<I, V> evt = new Event<I, V>(first.getMetainfo(),
+	// first.getUnixtime());
+	// for (SimpleEvent<I, V> simpleEvent : events) {
+	// evt.put(simpleEvent.getLabel(), simpleEvent.getValue());
+	// }
+	// return evt;
+	// }
+
+	// FIXME
+	// public Event<String, V> toStringInfo() {
+	// Event<String, V> evt = new Event<>(metainfo.toString(), unixtime);
+	// for (String label : values.keySet()) {
+	// evt.put(label, values.get(label));
+	// }
+	// return evt;
+	// }
+
+	public static <I extends Comparable<I>> Comparator<Event<I>> keyComparator(Class<I> info) {
+		return Event.infoComparator(info)
+				.thenComparing(Event.timeComparator(info));
+	}
+
+	public static <I> Comparator<Event<I>> timeComparator(Class<I> info) {
 		return Comparator.comparingLong(Event::getTimeInMillis);
 	}
 
-	public static <I extends Comparable<I>, V> Comparator<Event<I, V>> byInfoComparator() {
+	public static <I extends Comparable<I>> Comparator<Event<I>> infoComparator(Class<I> info) {
 		return Comparator.comparing(Event::getMetainfo);
 	}
 
-	public static <I extends Comparable<I>, V> Comparator<Event<I, V>> byInfoComparator(Class<I> info, Class<V> value) {
-		return byInfoComparator();
+	public boolean keyEquals(Event<I> evt) {
+		return infoEquals(evt) && timeEquals(evt);
 	}
 
-	public static <I, V extends Comparable<V>> Comparator<Event<I, V>> byValueComparator() {
-		return (a, b) -> {
-			int comparation = 0;
-			Set<String> labels = new HashSet<>();
-			labels.addAll(a.values.keySet());
-			labels.addAll(b.values.keySet());
-			for (String label : labels) {
-				V a_ = a.get(label);
-				V b_ = b.get(label);
-				if (a_ != null) {
-					if (b_ == null) {
-						return -1;
-					} else {
-						comparation = a_.compareTo(b_);
-						if (comparation != 0) {
-							return comparation;
-						}
-					}
-				} else {
-					if (b_ != null) {
-						return 1;
-					}
-				}
-			}
-			return comparation;
-		};
-	}
-
-	public static <I, V extends Comparable<V>> Comparator<Event<I, V>> byValueComparator(Class<I> info, Class<V> value) {
-		return byValueComparator();
-	}
-
-	public boolean keyEquals(Event<I, V> evt) {
-		if (!infoEquals(evt)) {
-			return false;
-		}
-		return timeEquals(evt);
-	}
-
-	public boolean infoEquals(Event<I, V> evt) {
+	public boolean infoEquals(Event<I> other) {
 		if (this.metainfo == null) {
-			if (evt.metainfo != null) {
-				return false;
-			}
-		} else if (!this.metainfo.equals(evt.metainfo)) {
-			return false;
+			return other.metainfo == null;
+		} else {
+			return this.metainfo.equals(other.metainfo);
 		}
-		return true;
 	}
 
-	public boolean timeEquals(Event<I, V> evt) {
+	public boolean timeEquals(Event<I> other) {
 		if (this.unixtime == null) {
-			if (evt.unixtime != null) {
-				return false;
-			}
-		} else if (!this.unixtime.equals(evt.unixtime)) {
-			return false;
+			return other.unixtime == null;
+		} else {
+			return this.unixtime.equals(other.unixtime);
 		}
-		return true;
-	}
-
-	public static <V> Event<String, V> bind(List<Event<String, V>> events, String metainfo) {
-		Event<String, V> bind = null;
-		for (Event<String, V> evt : events) {
-			if (bind == null) {
-				bind = new Event<String, V>(metainfo, evt.unixtime);
-			} else if (!bind.unixtime.equals(evt.unixtime)) {
-				// FIXME define a specific exception
-				throw new Error();
-			}
-			for (Entry<String, V> value : evt) {
-				bind.put(evt.metainfo + "." + value.getInfo(), value.getContent());
-			}
-		}
-		return bind;
 	}
 
 	@Override
@@ -218,7 +203,7 @@ public class Event<I, V> implements Iterable<Entry<String, V>> {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Event<?, ?> other = (Event<?, ?>) obj;
+		Event<?> other = (Event<?>) obj;
 		if (metainfo == null) {
 			if (other.metainfo != null)
 				return false;
@@ -239,18 +224,7 @@ public class Event<I, V> implements Iterable<Entry<String, V>> {
 
 	@Override
 	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		for (Map.Entry<String, V> entry : values.entrySet()) {
-			builder.append(entry.getKey())
-					.append(": ")
-					.append(entry.getValue())
-					.append(", ");
-		}
-		if (0 < builder.length()) {
-			builder.delete(builder.length() - 2, builder.length());
-		}
-		builder.append(']');
-		return "[" + metainfo + "] " + UtilitiesTime.formatMillis(unixtime.getTimeInMillis(), "yyyy-MM-dd HH:mm:ss") + " [" + builder.toString();
+		return "Event [metainfo=" + metainfo + ", unixtime=" + unixtime + ", values=" + values + "]";
 	}
 
 }

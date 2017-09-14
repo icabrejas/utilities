@@ -9,6 +9,8 @@ import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.IntFunction;
+import java.util.function.IntSupplier;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -41,6 +43,23 @@ public interface IterablePipe<T> extends Iterable<T> {
 
 	public static <T> IterablePipe<T> newInstance(Iterable<T> it) {
 		return it::iterator;
+	}
+
+	public static <T> IterablePipe<T> newInstance(IntFunction<T> get, IntSupplier length) {
+		return () -> new Iterator<T>() {
+
+			private int i;
+
+			@Override
+			public boolean hasNext() {
+				return i < length.getAsInt();
+			}
+
+			@Override
+			public T next() {
+				return get.apply(i++);
+			}
+		};
 	}
 
 	public default <R> IterablePipeMap<T, R> map(Function<T, R> mapper) {

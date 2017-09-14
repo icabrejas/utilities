@@ -2,33 +2,34 @@ package org.utilities.core.lang.iterable.timeseries.summary;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
 
-import org.utilities.core.lang.iterable.Entry;
+import org.utilities.core.dataframe.MapDataEntry;
+import org.utilities.core.dataframe.entry.DataEntry;
+import org.utilities.core.dataframe.entry.value.DataValue;
 import org.utilities.core.lang.iterable.IterablePipe;
 import org.utilities.core.lang.iterable.timeseries.Event;
 import org.utilities.core.time.Unixtime;
 import org.utilities.core.util.function.BiFunctionPlus;
 import org.utilities.core.util.map.NotNullMap;
 
-public interface Summary<I, V> extends Function<List<Event<I, V>>, Event<I, V>> {
+public interface Summary<I> extends Function<List<Event<I>>, Event<I>> {
 
-	public static class ByColumn<I, V> implements Summary<I, V> {
+	public static class ByColumn<I> implements Summary<I> {
 
 		private Function<Iterable<I>, I> metainfo;
 		private Function<Iterable<Unixtime>, Unixtime> unixtime;
-		private Function<Iterable<V>, V> summary;
+		private Function<Iterable<DataValue>, DataValue> summary;
 
-		public ByColumn(Function<Iterable<I>, I> metainfo, Function<Iterable<Unixtime>, Unixtime> unixtime, Function<Iterable<V>, V> summary) {
+		public ByColumn(Function<Iterable<I>, I> metainfo, Function<Iterable<Unixtime>, Unixtime> unixtime,
+				Function<Iterable<DataValue>, DataValue> summary) {
 			this.metainfo = metainfo;
 			this.unixtime = unixtime;
 			this.summary = summary;
 		}
 
-		public ByColumn(long window, Function<Iterable<V>, V> summary) {
+		public ByColumn(long window, Function<Iterable<DataValue>, DataValue> summary) {
 			this.metainfo = Summary.ByColumn::metainfo;
 			this.unixtime = BiFunctionPlus.parseFunction(Summary.ByColumn::unixtime, window);
 			this.summary = summary;
@@ -68,35 +69,36 @@ public interface Summary<I, V> extends Function<List<Event<I, V>>, Event<I, V>> 
 		}
 
 		@Override
-		public Event<I, V> apply(List<Event<I, V>> events) {
+		public Event<I> apply(List<Event<I>> events) {
 			I metainfo = metainfo(events);
 			Unixtime unixtime = unixtime(events);
-			Event<I, V> summary = new Event<>(metainfo, unixtime);
-			summary.setValues(summarize(events));
+			Event<I> summary = new Event<>(metainfo, unixtime);
+			summary.values(summarize(events));
 			return summary;
 		}
 
-		private I metainfo(List<Event<I, V>> events) {
+		private I metainfo(List<Event<I>> events) {
 			return IterablePipe.newInstance(events)
 					.map(Event::getMetainfo)
 					.apply(this.metainfo);
 		}
 
-		private Unixtime unixtime(List<Event<I, V>> events) {
+		private Unixtime unixtime(List<Event<I>> events) {
 			return IterablePipe.newInstance(events)
 					.map(Event::getUnixtime)
 					.apply(this.unixtime);
 		}
 
-		private Map<String, V> summarize(Iterable<Event<I, V>> events) {
-			NotNullMap<String, List<V>> rawValues = new NotNullMap<>(ArrayList::new);
-			for (Event<I, V> evt : events) {
-				for (Entry<String, V> value : evt) {
-					rawValues.get(value.getInfo())
-							.add(value.getContent());
+		private DataEntry summarize(Iterable<Event<I>> events) {
+			NotNullMap<String, List<DataValue>> rawValues = new NotNullMap<>(ArrayList::new);
+			for (Event<I> evt : events) {
+				for (String name : evt.names()) {
+					DataValue value = evt.get(name);
+					rawValues.get(name)
+							.add(value);
 				}
 			}
-			Map<String, V> summaryValues = new HashMap<>();
+			MapDataEntry summaryValues = new MapDataEntry();
 			for (String label : rawValues.keySet()) {
 				summaryValues.put(label, summary.apply(rawValues.get(label)));
 			}

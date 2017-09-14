@@ -20,9 +20,13 @@ public class UtilitiesJSON {
 	private UtilitiesJSON() {
 	}
 
-	public static String classToJson(Object value) throws IOException {
-		ObjectMapper mapper = new ObjectMapper();
-		return mapper.writeValueAsString(value);
+	public static String classToJson(Object value) throws QuietException {
+		try {
+			ObjectMapper mapper = new ObjectMapper();
+			return mapper.writeValueAsString(value);
+		} catch (IOException e) {
+			throw new QuietException(e);
+		}
 	}
 
 	public static <T> T jsonToClass(String content, Class<T> valueType) throws QuietException {

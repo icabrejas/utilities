@@ -2,45 +2,45 @@ package org.utilities.core.lang.iterable.timeseries.filters;
 
 import org.utilities.core.lang.iterable.timeseries.Event;
 
-public abstract class EventFilterComposed<I, V> implements EventFilter<I, V> {
+public abstract class EventFilterComposed<I> implements EventFilter<I> {
 
-	private EventFilter<I, V> left;
-	private EventFilter<I, V> right;
+	private EventFilter<I> left;
+	private EventFilter<I> right;
 
-	protected EventFilterComposed(EventFilter<I, V> left, EventFilter<I, V> right) {
+	protected EventFilterComposed(EventFilter<I> left, EventFilter<I> right) {
 		this.left = left;
 		this.right = right;
 	}
 
-	public EventFilter<I, V> getLeft() {
+	public EventFilter<I> getLeft() {
 		return left;
 	}
 
-	public EventFilter<I, V> getRight() {
+	public EventFilter<I> getRight() {
 		return right;
 	}
 
-	public static class And<I, V> extends EventFilterComposed<I, V> {
+	public static class And<I> extends EventFilterComposed<I> {
 
-		public And(EventFilter<I, V> left, EventFilter<I, V> right) {
+		public And(EventFilter<I> left, EventFilter<I> right) {
 			super(left, right);
 		}
 
 		@Override
-		public boolean test(Event<I, V> t) {
+		public boolean test(Event<I> t) {
 			return getLeft().test(t) && getRight().test(t);
 		}
 
 	}
 
-	public static class Or<I, V> extends EventFilterComposed<I, V> {
+	public static class Or<I> extends EventFilterComposed<I> {
 
-		public Or(EventFilter<I, V> left, EventFilter<I, V> right) {
+		public Or(EventFilter<I> left, EventFilter<I> right) {
 			super(left, right);
 		}
 
 		@Override
-		public boolean test(Event<I, V> t) {
+		public boolean test(Event<I> t) {
 			return getLeft().test(t) || getRight().test(t);
 		}
 

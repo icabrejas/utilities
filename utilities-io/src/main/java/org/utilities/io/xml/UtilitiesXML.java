@@ -22,6 +22,7 @@ import org.utilities.core.lang.exception.QuietException;
 import org.utilities.core.lang.iterable.IterablePipe;
 import org.utilities.core.lang.iterable.UtilitiesIterable;
 import org.utilities.core.util.function.BiConsumerPlus;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -30,25 +31,37 @@ import org.xml.sax.SAXException;
 
 public class UtilitiesXML {
 
-	public static Element read(File file) throws ParserConfigurationException, SAXException, IOException {
-		return DocumentBuilderFactory.newInstance()
-				.newDocumentBuilder()
-				.parse(file)
-				.getDocumentElement();
+	public static Element read(File file) throws QuietException {
+		try {
+			return DocumentBuilderFactory.newInstance()
+					.newDocumentBuilder()
+					.parse(file)
+					.getDocumentElement();
+		} catch (SAXException | IOException | ParserConfigurationException e) {
+			throw new QuietException(e);
+		}
 	}
 
-	public static Element read(InputStream stream) throws ParserConfigurationException, SAXException, IOException {
-		return DocumentBuilderFactory.newInstance()
-				.newDocumentBuilder()
-				.parse(stream)
-				.getDocumentElement();
+	public static Element read(InputStream stream) throws QuietException {
+		try {
+			return DocumentBuilderFactory.newInstance()
+					.newDocumentBuilder()
+					.parse(stream)
+					.getDocumentElement();
+		} catch (SAXException | IOException | ParserConfigurationException e) {
+			throw new QuietException(e);
+		}
 	}
 
-	public static Element read(URL uri) throws ParserConfigurationException, SAXException, IOException {
-		return DocumentBuilderFactory.newInstance()
-				.newDocumentBuilder()
-				.parse(uri.toString())
-				.getDocumentElement();
+	public static Element read(URL uri) throws QuietException {
+		try {
+			return DocumentBuilderFactory.newInstance()
+					.newDocumentBuilder()
+					.parse(uri.toString())
+					.getDocumentElement();
+		} catch (SAXException | IOException | ParserConfigurationException e) {
+			throw new QuietException(e);
+		}
 	}
 
 	public static void process(IterablePipe<Node> nodes, Consumer<Node> childConsumer) {
@@ -101,4 +114,16 @@ public class UtilitiesXML {
 		}
 	}
 
+		public static IterablePipe<Node> childs(NodeList node) {
+		return IterablePipe.newInstance(node::item, node::getLength);
+	}
+
+	public static IterablePipe<Node> childs(Node node) {
+		return childs(node.getChildNodes());
+	}
+
+	public static IterablePipe<Node> elementsByTagName(Document doc, String tagname) {
+		return childs(doc.getElementsByTagName(tagname));
+	}
+	
 }
