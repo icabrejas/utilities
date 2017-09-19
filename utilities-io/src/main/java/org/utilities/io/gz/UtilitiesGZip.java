@@ -58,4 +58,9 @@ public class UtilitiesGZip {
 		return new EntryGZip<>(metainfo, inputStream);
 	}
 
+	public static GZIPInputStream getInputStream(File file) {
+		return UtilitiesGZip.newEntryGZip(file)
+				.getContent();
+	}
+
 }
