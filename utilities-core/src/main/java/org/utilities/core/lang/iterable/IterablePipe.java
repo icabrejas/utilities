@@ -15,6 +15,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import org.utilities.core.time.TicToc;
+import org.utilities.core.util.concurrent.UtilitiesThread;
 import org.utilities.core.util.function.BiConsumerPlus;
 import org.utilities.core.util.function.BiFunctionPlus;
 import org.utilities.core.util.function.BiPredicatePlus;
@@ -76,6 +77,15 @@ public interface IterablePipe<T> extends Iterable<T> {
 
 	public default <U, R> IterablePipeMap<T, R> map(BiFunction<T, U, R> mapper, Function<T, ? extends U> u) {
 		return map(BiFunctionPlus.parseFunction(mapper, u));
+	}
+
+	public default <R> IterablePipe<R> parallelMap(Function<T, R> mapper) {
+		return parallelMap(mapper, UtilitiesThread.nThreads());
+	}
+
+	public default <R> IterablePipe<R> parallelMap(Function<T, R> mapper, int nThreads) {
+		return this.tuples(nThreads)
+				.flatMap(IterablePipeMap::parallelMap, mapper);
 	}
 
 	public default <R> IterablePipeFlat<R> flatMap(Function<T, ? extends Iterable<R>> mapper) {

@@ -73,9 +73,6 @@ public class IterablePipeBatch<T> implements IterablePipe<List<T>> {
 		private void fill() {
 			batch.clear();
 			T prev = null;
-			if (current == null && it.hasNext()) {
-				current = it.next();
-			}
 			if (current != null) {
 				batch.add(prev = current);
 				current = null;

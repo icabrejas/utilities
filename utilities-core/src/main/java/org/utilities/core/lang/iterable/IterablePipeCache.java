@@ -1,5 +1,6 @@
 package org.utilities.core.lang.iterable;
 
+import java.util.Arrays;
 import java.util.Iterator;
 
 import org.utilities.core.util.concurrent.UtilitiesThread;
@@ -20,7 +21,7 @@ public class IterablePipeCache<T> implements IterablePipe<T> {
 	private static class It<T> implements Iterator<T> {
 
 		private Iterator<T> it;
-		private SingleIterator<T> next;
+		private Iterator<T> next;
 
 		public It(Iterator<T> it) {
 			this.it = it;
@@ -43,7 +44,8 @@ public class IterablePipeCache<T> implements IterablePipe<T> {
 
 		private void fillNext() {
 			this.next = null;
-			UtilitiesThread.run(() -> this.next = new SingleIterator<>(it));
+			UtilitiesThread.run(() -> this.next = Arrays.asList(it.next())
+					.iterator());
 		}
 
 		private void waitForNext() {

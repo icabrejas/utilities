@@ -147,11 +147,6 @@ public class UtilitiesImage {
 	}
 
 	public static BufferedImage scale(BufferedImage img, double sx, double sy, boolean aspectRatio) {
-		BufferedImage dest = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_INT_RGB);
-		Graphics2D g2 = (Graphics2D) dest.getGraphics();
-		applyRenderingHints(g2);
-		g2.drawImage(img, 0, 0, img.getWidth(), img.getHeight(), null);
-		img = dest;
 		AffineTransform scale = null;
 		int width, height;
 		if (aspectRatio) {
@@ -164,6 +159,11 @@ public class UtilitiesImage {
 			width = (int) Math.round(sx * img.getWidth());
 			height = (int) Math.round(sy * img.getHeight());
 		}
+		BufferedImage dest = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_INT_RGB);
+		Graphics2D g2 = (Graphics2D) dest.getGraphics();
+		applyRenderingHints(g2);
+		g2.drawImage(img, 0, 0, img.getWidth(), img.getHeight(), null);
+		img = dest;
 		dest = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 		AffineTransformOp affineTransform = new AffineTransformOp(scale, HINTS);
 		affineTransform.filter(img, dest);

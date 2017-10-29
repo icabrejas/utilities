@@ -15,12 +15,22 @@ import org.utilities.core.util.function.FunctionPlus;
 
 public class UtilitiesThread {
 
+	private static final int DEFAULT_SLEEP_MILLIS = 60;
+
 	public static ExecutorService newThreadPool() {
-		return newThreadPool(Math.max(1, UtilitiesRuntime.availableProcessors() - 1));
+		return newThreadPool(nThreads());
+	}
+
+	public static int nThreads() {
+		return Math.max(1, UtilitiesRuntime.availableProcessors() - 1);
 	}
 
 	public static ExecutorService newThreadPool(int nThreads) {
 		return Executors.newFixedThreadPool(nThreads);
+	}
+
+	public static void run(Runnable runnable) {
+		new Thread(runnable).start();
 	}
 
 	public static void runParallel(Iterable<Runnable> tasks, boolean wait) {
@@ -46,7 +56,7 @@ public class UtilitiesThread {
 	}
 
 	public static void wait(ExecutorService pool) throws QuietException {
-		wait(pool, 100);
+		wait(pool, DEFAULT_SLEEP_MILLIS);
 	}
 
 	public static void wait(ExecutorService pool, long sleepMillis) throws QuietException {
@@ -58,7 +68,7 @@ public class UtilitiesThread {
 
 	public static void wait(Supplier<Boolean> semaphore) throws QuietException {
 		while (!semaphore.get()) {
-			UtilitiesThread.sleepQuietly(100);
+			UtilitiesThread.sleepQuietly(DEFAULT_SLEEP_MILLIS);
 		}
 	}
 
@@ -83,10 +93,6 @@ public class UtilitiesThread {
 				runnable.run();
 			}
 		}).start();
-	}
-
-	public static void run(Runnable runnable) {
-		new Thread(runnable).start();
 	}
 
 }
