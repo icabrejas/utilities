@@ -34,7 +34,7 @@
 		<module>utilities-graphics</module>
     <module>utilities-resources</module>
     <module>utilities-orm</module>
-    <module>utilities-twitter</module>
+<!--    <module>utilities-twitter</module> -->
 	</modules>
 	
 </project>
