@@ -15,14 +15,14 @@ import org.utilities.core.util.function.FunctionPlus;
 
 public class UtilitiesThread {
 
-	private static final int DEFAULT_SLEEP_MILLIS = 60;
+	public static final int DEFAULT_SLEEP_MILLIS = 60;
 
 	public static ExecutorService newThreadPool() {
 		return newThreadPool(nThreads());
 	}
 
 	public static int nThreads() {
-		return Math.max(1, UtilitiesRuntime.availableProcessors() - 1);
+		return Math.max(1, 4 * UtilitiesRuntime.availableProcessors());
 	}
 
 	public static ExecutorService newThreadPool(int nThreads) {

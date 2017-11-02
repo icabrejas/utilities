@@ -84,8 +84,7 @@ public interface IterablePipe<T> extends Iterable<T> {
 	}
 
 	public default <R> IterablePipe<R> parallelMap(Function<T, R> mapper, int nThreads) {
-		return this.tuples(nThreads)
-				.flatMap(IterablePipeMap::parallelMap, mapper);
+		return new IterablePipeParallelMap<>(this, mapper, nThreads);
 	}
 
 	public default <R> IterablePipeFlat<R> flatMap(Function<T, ? extends Iterable<R>> mapper) {
@@ -103,6 +102,14 @@ public interface IterablePipe<T> extends Iterable<T> {
 	public default <U, R> IterablePipeFlat<R> flatMap(BiFunction<T, U, Iterable<R>> mapper,
 			Function<T, ? extends U> u) {
 		return flatMap(BiFunctionPlus.parseFunction(mapper, u));
+	}
+
+	public default <R> IterablePipeFlat<R> parallelFlatMap(Function<T, ? extends Iterable<R>> mapper) {
+		return new IterablePipeFlat<>(parallelMap(mapper));
+	}
+
+	public default <R> IterablePipeFlat<R> parallelFlatMap(Function<T, ? extends Iterable<R>> mapper, int nThreads) {
+		return new IterablePipeFlat<>(parallelMap(mapper, nThreads));
 	}
 
 	public default IterablePipeFlat<T> bind(Iterable<T> it) {
@@ -221,16 +228,6 @@ public interface IterablePipe<T> extends Iterable<T> {
 
 	public default Pipeline<IterablePipe<T>> pipe() {
 		return Pipeline.newInstance(this);
-	}
-
-	public default IterablePipeCache<T> cache() {
-		return new IterablePipeCache<T>(this);
-	}
-
-	public default IterablePipe<T> cache(int bufferSize) {
-		return this.tuples(bufferSize)
-				.cache()
-				.flatMap(Function.identity());
 	}
 
 }
