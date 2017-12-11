@@ -5,13 +5,12 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.utilities.core.dataframe.MapDataEntry;
-import org.utilities.core.dataframe.Mutation;
 import org.utilities.core.dataframe.entry.DataEntry;
+import org.utilities.core.dataframe.entry.DataEntryImpl;
+import org.utilities.core.dataframe.entry.mutate.Mutation;
 import org.utilities.core.dataframe.entry.value.DataValue;
 import org.utilities.core.time.Unixtime;
 
@@ -20,7 +19,7 @@ public class Event<I> implements DataEntry {
 	private I metainfo;
 	// TODO ¿is the correct class (maybe this class is unnecessary)?
 	private Unixtime unixtime;
-	private DataEntry values = new MapDataEntry();
+	private DataEntry values = new DataEntryImpl();
 
 	public Event(I metainfo, Unixtime unixtime) {
 		this.metainfo = metainfo;
@@ -53,8 +52,8 @@ public class Event<I> implements DataEntry {
 	}
 
 	@Override
-	public Collection<String> names() {
-		return values.names();
+	public Collection<String> keys() {
+		return values.keys();
 	}
 
 	@Override
@@ -86,23 +85,11 @@ public class Event<I> implements DataEntry {
 		return newInstance(values.mutate(name, func));
 	}
 
-	@Override
-	public <T> Event<I> mutate(String name, String x, Function<DataValue, DataValue> func) {
-		return newInstance(values.mutate(name, x, func));
+	public List<Event<I>> gatherEvent(String key, String value, String... names) {
+		return gatherEvent(key, value, Arrays.asList(names));
 	}
 
-	@Override
-	public <T> Event<I> mutate(String name, String x, String y, BiFunction<DataValue, DataValue, DataValue> func) {
-		return newInstance(values.mutate(name, x, y, func));
-	}
-
-	@Override
-	public List<? extends DataEntry> gather(String key, String value, String... names) {
-		return gather(key, value, Arrays.asList(names));
-	}
-
-	@Override
-	public List<? extends DataEntry> gather(String key, String value, Collection<String> names) {
+	public List<Event<I>> gatherEvent(String key, String value, Collection<String> names) {
 		return values.gather(key, value, names)
 				.stream()
 				.map(this::newInstance)
@@ -110,7 +97,7 @@ public class Event<I> implements DataEntry {
 	}
 
 	@Override
-	public DataEntry gather(String key, String value, String name) {
+	public Event<I> gather(String key, String value, String name) {
 		return newInstance(values.gather(key, value, name));
 	}
 
@@ -120,6 +107,7 @@ public class Event<I> implements DataEntry {
 				.entrySet()
 				.stream()
 				.map(entry -> Event.bind(entry.getValue(), metainfo, entry.getKey()))
+				.sorted(Event.timeComparator())
 				.collect(Collectors.toList());
 	}
 
@@ -152,13 +140,26 @@ public class Event<I> implements DataEntry {
 	// return evt;
 	// }
 
+	public static <I extends Comparable<I>> Comparator<Event<I>> keyComparator() {
+		Comparator<Event<I>> comparator = Event.infoComparator();
+		return comparator.thenComparing(Event.timeComparator());
+	}
+
 	public static <I extends Comparable<I>> Comparator<Event<I>> keyComparator(Class<I> info) {
-		return Event.infoComparator(info)
-				.thenComparing(Event.timeComparator(info));
+		Comparator<Event<I>> comparator = Event.infoComparator(info);
+		return comparator.thenComparing(Event.timeComparator(info));
+	}
+
+	public static <I> Comparator<Event<I>> timeComparator() {
+		return Comparator.comparingLong(Event::getTimeInMillis);
 	}
 
 	public static <I> Comparator<Event<I>> timeComparator(Class<I> info) {
 		return Comparator.comparingLong(Event::getTimeInMillis);
+	}
+
+	public static <I extends Comparable<I>> Comparator<Event<I>> infoComparator() {
+		return Comparator.comparing(Event::getMetainfo);
 	}
 
 	public static <I extends Comparable<I>> Comparator<Event<I>> infoComparator(Class<I> info) {

@@ -3,35 +3,35 @@ package org.utilities.core.lang.iterable.timeseries.filters;
 import java.util.function.Predicate;
 
 import org.utilities.core.lang.iterable.timeseries.Event;
+import org.utilities.core.util.function.PredicatePlus;
 
-public interface EventFilter<I> extends Predicate<Event<I>> {
+public interface EventFilter<I> extends PredicatePlus<Event<I>> {
+
+	public static <I> EventFilter<I> newInstance(Class<I> info) {
+		return evt -> true;
+	}
 
 	public static <I> EventFilter<I> newInstance(Predicate<Event<I>> filter) {
 		return filter::test;
 	}
 
-	public static <I> EventFilter<I> and(EventFilter<I> a, EventFilter<I> b) {
-		return a.and(b);
-	}
-
 	public static <I> EventFilter<I> or(EventFilter<I> a, EventFilter<I> b) {
-		return a.or(b);
+		return PredicatePlus.or(a, b)::test;
 	}
 
-	default EventFilter<I> and(EventFilter<I> filter) {
-		return evt -> test(evt) && filter.test(evt);
+	@Override
+	default EventFilter<I> and(Predicate<? super Event<I>> filter) {
+		return PredicatePlus.super.and(filter)::test;
 	}
 
-	default EventFilter<I> or(EventFilter<I> filter) {
-		return evt -> test(evt) || filter.test(evt);
-	}
-
+	@Override
 	default EventFilter<I> negate() {
-		return evt -> !test(evt);
+		return PredicatePlus.super.negate()::test;
 	}
 
-	public static <I> EventFilter<I> newInstance(Class<I> info) {
-		return evt -> true;
+	@Override
+	default EventFilter<I> or(Predicate<? super Event<I>> filter) {
+		return PredicatePlus.super.or(filter)::test;
 	}
 
 }

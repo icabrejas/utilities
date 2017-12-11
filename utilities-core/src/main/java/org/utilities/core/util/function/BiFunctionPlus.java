@@ -4,6 +4,8 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import org.utilities.core.util.pair.Pair;
+
 public interface BiFunctionPlus<T, U, R> extends BiFunction<T, U, R> {
 
 	public static <T, U, R> BiFunctionPlus<T, U, R> newInstance(BiFunction<T, U, R> biFunction) {
@@ -22,6 +24,14 @@ public interface BiFunctionPlus<T, U, R> extends BiFunction<T, U, R> {
 	public static <T, U, R> FunctionPlus<T, R> parseFunction(BiFunction<T, U, ? extends R> biFunction,
 			Function<T, ? extends U> u) {
 		return t -> biFunction.apply(t, u.apply(t));
+	}
+
+	public static <T, U, R> FunctionPlus<Pair<T, U>, R> parseFunction(BiFunction<T, U, R> biFunction) {
+		return pair -> biFunction.apply(pair.getX(), pair.getY());
+	}
+
+	default FunctionPlus<Pair<T, U>, R> parseFunction() {
+		return BiFunctionPlus.parseFunction(this);
 	}
 
 	default FunctionPlus<T, R> parseFunction(U u) {

@@ -3,6 +3,7 @@ package org.utilities.core.util.function;
 import java.lang.reflect.Field;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import org.utilities.core.lang.exception.QuietException;
 
@@ -21,12 +22,22 @@ public interface FunctionPlus<T, R> extends Function<T, R> {
 		return andThen(BiFunctionPlus.parseFunction(after, u));
 	}
 
+	default <U, V> Function<T, R> ifElse(Predicate<T> expression, Function<T, R> if_, Function<T, R> else_) {
+		return t -> {
+			if (expression.test(t)) {
+				return if_.apply(t);
+			} else {
+				return else_.apply(t);
+			}
+		};
+	}
+
 	@Override
 	default <V> FunctionPlus<V, R> compose(Function<? super V, ? extends T> before) {
 		return newInstance(Function.super.compose(before));
 	}
 
-	public static <T, R, U> FunctionPlus<T, U> compose(Function<R, U> g, Function<T, R> f) {
+	static <T, R, U> FunctionPlus<T, U> compose(Function<R, U> g, Function<T, R> f) {
 		return newInstance(g.compose(f));
 	}
 
@@ -34,11 +45,11 @@ public interface FunctionPlus<T, R> extends Function<T, R> {
 		return compose(before.parseFunction(v));
 	}
 
-	public static <T, R> FunctionPlus<T, R> newInstance(Function<T, R> function) {
+	static <T, R> FunctionPlus<T, R> newInstance(Function<T, R> function) {
 		return function::apply;
 	}
 
-	public static <T, R> SupplierPlus<R> parseSupplier(Function<T, R> function, T t) {
+	static <T, R> SupplierPlus<R> parseSupplier(Function<T, R> function, T t) {
 		return () -> function.apply(t);
 	}
 
@@ -46,14 +57,13 @@ public interface FunctionPlus<T, R> extends Function<T, R> {
 		return parseSupplier(this, t);
 	}
 
-	public static <T, R> FunctionPlus<T, R> getter(Class<T> type, String name)
-			throws NoSuchFieldException, SecurityException {
+	static <T, R> FunctionPlus<T, R> getter(Class<T> type, String name) throws NoSuchFieldException, SecurityException {
 		Field field = type.getDeclaredField(name);
 		return getter(field);
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <T, R> FunctionPlus<T, R> getter(Field field) {
+	static <T, R> FunctionPlus<T, R> getter(Field field) {
 		return t -> {
 			try {
 				return (R) field.get(t);
@@ -63,15 +73,15 @@ public interface FunctionPlus<T, R> extends Function<T, R> {
 		};
 	}
 
-	public static <T, R> FunctionPlus<T, R> applyIfNotNull(Function<T, R> function) {
+	static <T, R> FunctionPlus<T, R> applyIfNotNull(Function<T, R> function) {
 		return t -> applyIfNotNull(t, function);
 	}
 
-	public static <T, R> R applyIfNotNull(T t, Function<T, R> function) {
+	static <T, R> R applyIfNotNull(T t, Function<T, R> function) {
 		return t != null ? function.apply(t) : null;
 	}
 
-	public static <T, R> FunctionPlus<T, R> parseQuiet(Noisy<T, R> noisy) {
+	static <T, R> FunctionPlus<T, R> parseQuiet(Noisy<T, R> noisy) {
 		return t -> {
 			try {
 				return noisy.apply(t);
