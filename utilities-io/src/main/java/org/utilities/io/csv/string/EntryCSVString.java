@@ -2,10 +2,10 @@ package org.utilities.io.csv.string;
 
 import java.util.Map;
 
-import org.utilities.core.dataframe.MapDataEntry;
+import org.utilities.core.dataframe.entry.DataEntryImpl;
 import org.utilities.core.dataframe.entry.value.DataValue;
 
-public class EntryCSVString<I> extends MapDataEntry {
+public class EntryCSVString<I> extends DataEntryImpl {
 
 	private I metainfo;
 

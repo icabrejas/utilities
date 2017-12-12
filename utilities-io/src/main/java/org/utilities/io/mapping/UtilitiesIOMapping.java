@@ -5,7 +5,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.utilities.core.dataframe.MapDataEntry;
+import org.utilities.core.dataframe.entry.DataEntryImpl;
 import org.utilities.core.dataframe.entry.value.DataValue;
 import org.utilities.core.lang.exception.QuietException;
 import org.utilities.core.lang.iterable.timeseries.Event;
@@ -207,8 +207,8 @@ public class UtilitiesIOMapping {
 		}
 
 		private static <I> void put(EntryCSVString<I> entry, Event<I> evt, String... remove) {
-			MapDataEntry values = new MapDataEntry();
-			for (String label : entry.names()) {
+			DataEntryImpl values = new DataEntryImpl();
+			for (String label : entry.keys()) {
 				if (!ArrayUtils.contains(remove, label)) {
 					DataValue value = entry.get(label);
 					if (value != null) {

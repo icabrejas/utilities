@@ -7,9 +7,8 @@ import java.util.List;
 import java.util.function.ToDoubleBiFunction;
 import java.util.stream.Collectors;
 
-import org.utilities.core.lang.iterable.Entry;
 import org.utilities.core.lang.iterable.IterablePipeSequence;
-import org.utilities.core.lang.iterable.UtilitiesIterable;
+import org.utilities.core.util.pair.PairImpl;
 
 public class UtilitiesList {
 
@@ -53,7 +52,7 @@ public class UtilitiesList {
 	}
 
 	public static <T> List<Integer> order(List<T> sample, Comparator<? super T> sorter) {
-		return UtilitiesIterable.sequence(0, sample.size() - 1, 1)
+		return IterablePipeSequence.newInstance(0, sample.size() - 1, 1)
 				.toList()
 				.stream()
 				.sorted((i, j) -> sorter.compare(sample.get(i), sample.get(j)))
@@ -65,7 +64,7 @@ public class UtilitiesList {
 	}
 
 	public static <T> List<T> quantiles(List<T> sample, int n, Comparator<T> sorter) {
-		List<Double> percentiles = IterablePipeSequence.newInstance(1, n, 1)
+		List<Double> percentiles = IterablePipeSequence.newInstance(1., n, 1.)
 				.map(x -> x / (n + 1))
 				.toList();
 		return quantiles(sample, percentiles, sorter);
@@ -85,14 +84,16 @@ public class UtilitiesList {
 				.collect(Collectors.toList());
 	}
 
+	// FIXME use parallel??
 	public static <T, U> U oneNN(T t, List<U> centroids, ToDoubleBiFunction<T, U> distance) {
 		return centroids.stream()
-				.map(centroid -> Entry.newInstance(distance.applyAsDouble(t, centroid), centroid))
-				.min((c1, c2) -> Double.compare(c1.getInfo(), c2.getInfo()))
+				.map(centroid -> new PairImpl<>(distance.applyAsDouble(t, centroid), centroid))
+				.min((c1, c2) -> Double.compare(c1.getX(), c2.getX()))
 				.get()
-				.getContent();
+				.getY();
 	}
 
+	// FIXME use parallel??
 	public static <T, U> List<U> oneNN(List<T> sample, List<U> centroids, ToDoubleBiFunction<T, U> distance) {
 		return sample.stream()
 				.map(t -> oneNN(t, centroids, distance))
@@ -100,16 +101,11 @@ public class UtilitiesList {
 	}
 
 	public static Double oneNN(Double x, List<Double> centroids) {
-		return oneNN(x, centroids, UtilitiesList.doubleDistance());
+		return oneNN(x, centroids, UtilitiesList::doubleDistance);
 	}
 
 	public static List<Double> oneNN(List<Double> sample, List<Double> centroids) {
-		return oneNN(sample, centroids, UtilitiesList.doubleDistance());
-	}
-
-	// FIXME move to correct class
-	public static ToDoubleBiFunction<Double, Double> doubleDistance() {
-		return UtilitiesList::doubleDistance;
+		return oneNN(sample, centroids, UtilitiesList::doubleDistance);
 	}
 
 	// FIXME move to correct class

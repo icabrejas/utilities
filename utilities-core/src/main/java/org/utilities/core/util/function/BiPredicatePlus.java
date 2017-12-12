@@ -4,6 +4,10 @@ import java.util.function.BiPredicate;
 
 public interface BiPredicatePlus<T, U> extends BiPredicate<T, U> {
 
+	public static <T, U> BiPredicatePlus<T, U> dummy() {
+		return (t1, t2) -> true;
+	}
+
 	public static <T, U> BiPredicatePlus<T, U> newInstance(BiPredicate<T, U> biPredicate) {
 		return biPredicate::test;
 	}

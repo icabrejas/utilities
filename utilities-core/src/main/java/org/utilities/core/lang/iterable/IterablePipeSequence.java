@@ -19,6 +19,22 @@ public class IterablePipeSequence implements IterablePipe<Double> {
 		return new IterablePipeSequence(from, to, by);
 	}
 
+	public static IterablePipe<Integer> newInstance(int from, int to, int by) {
+		return new IterablePipeSequence(from, to, by).map(Double::intValue);
+	}
+
+	public static IterablePipe<Integer> newInstance(int from, int to) {
+		return newInstance(from, to, 1);
+	}
+
+	public static IterablePipe<Long> newInstance(long from, long to, long by) {
+		return new IterablePipeSequence(from, to, by).map(Double::longValue);
+	}
+
+	public static IterablePipe<Long> newInstance(long from, long to) {
+		return newInstance(from, to, 1L);
+	}
+
 	@Override
 	public Iterator<Double> iterator() {
 		return new It(from, to, by);

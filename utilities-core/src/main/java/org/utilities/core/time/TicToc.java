@@ -19,7 +19,7 @@ public class TicToc {
 
 	public TicToc toc() {
 		System.out.println(UtilitiesTime.formatMillis(System.currentTimeMillis() - tic, pattern));
-		return this;
+		return tic();
 	}
 
 }

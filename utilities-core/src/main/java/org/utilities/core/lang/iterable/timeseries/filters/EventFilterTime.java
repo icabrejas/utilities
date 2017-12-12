@@ -1,106 +1,101 @@
 package org.utilities.core.lang.iterable.timeseries.filters;
 
-import org.utilities.core.lang.iterable.filter.IterableFilter;
+import java.util.function.Predicate;
+
 import org.utilities.core.lang.iterable.timeseries.Event;
 import org.utilities.core.time.Unixtime;
+import org.utilities.core.util.function.PredicatePlus;
 
-public class EventFilterTime {
+public class EventFilterTime<I> implements EventFilter<I> {
 
-	public static <I> IterableFilter<Event<I>> isEquals(long unixtime) {
-		return new Equals<>(unixtime);
+	private Predicate<Long> predicate;
+
+	private EventFilterTime(Predicate<Long> predicate) {
+		this.predicate = predicate;
 	}
 
-	public static <I> IterableFilter<Event<I>> isEquals(int field, int value) {
+	@Override
+	public boolean test(Event<I> evt) {
+		return predicate.test(evt.getTimeInMillis());
+	}
+
+	public EventFilterTime<I> and(EventFilterTime<I> filter) {
+		return new EventFilterTime<>(PredicatePlus.and(this.predicate, filter.predicate));
+	}
+
+	@Override
+	public EventFilterTime<I> negate() {
+		return new EventFilterTime<>(this.predicate.negate());
+	}
+
+	public EventFilterTime<I> or(EventFilterTime<I> filter) {
+		return new EventFilterTime<>(PredicatePlus.or(this.predicate, filter.predicate));
+	}
+
+	public static <I> EventFilterTime<I> isEquals(long milliseconds) {
+		return new Equals<>(milliseconds);
+	}
+
+	public static <I> EventFilterTime<I> isEquals(int field, int value) {
 		return new FieldEquals<>(field, value);
 	}
 
-	public static <I> IterableFilter<Event<I>> isHigher(long unixtime) {
-		return new Higher<>(unixtime);
+	public static <I> EventFilterTime<I> isHigher(long milliseconds) {
+		return new Higher<>(milliseconds);
 	}
 
-	public static <I> IterableFilter<Event<I>> isHigherOrEquals(long unixtime) {
-		IterableFilter<Event<I>> higher = isHigher(unixtime);
-		return higher.or(isEquals(unixtime));
+	public static <I> EventFilterTime<I> isHigherOrEquals(long milliseconds) {
+		EventFilterTime<I> higher = EventFilterTime.isHigher(milliseconds);
+		return higher.or(EventFilterTime.isEquals(milliseconds));
 	}
 
-	public static <I> IterableFilter<Event<I>> isLower(long unixtime) {
-		return new Lower<I>(unixtime);
+	public static <I> EventFilterTime<I> isLower(long milliseconds) {
+		return new Lower<I>(milliseconds);
 	}
 
-	public static <I> IterableFilter<Event<I>> isLowerOrEquals(long unixtime) {
-		IterableFilter<Event<I>> lower = isLower(unixtime);
-		return lower.or(isEquals(unixtime));
+	public static <I> EventFilterTime<I> isLowerOrEquals(long milliseconds) {
+		EventFilterTime<I> lower = EventFilterTime.isLower(milliseconds);
+		return lower.or(EventFilterTime.isEquals(milliseconds));
 	}
 
-	public static <I> IterableFilter<Event<I>> isBetween(long from, long to) {
-		IterableFilter<Event<I>> higher = isHigher(from);
-		return higher.and(isLower(to));
+	public static <I> EventFilterTime<I> isBetween(long from, long to) {
+		EventFilterTime<I> higher = EventFilterTime.isHigher(from);
+		return higher.and(EventFilterTime.isLower(to));
 	}
 
-	public static <I> IterableFilter<Event<I>> isBetweenOrEquals(long from, long to) {
-		IterableFilter<Event<I>> higher = isHigherOrEquals(from);
-		return higher.and(isLowerOrEquals(to));
+	public static <I> EventFilterTime<I> isBetweenOrEquals(long from, long to) {
+		EventFilterTime<I> higher = EventFilterTime.isHigherOrEquals(from);
+		return higher.and(EventFilterTime.isLowerOrEquals(to));
 	}
 
-	public static class Equals<I> implements IterableFilter<Event<I>> {
+	private static class Lower<I> extends EventFilterTime<I> {
 
-		private Unixtime unixtime;
-
-		private Equals(long unixtime) {
-			this.unixtime = new Unixtime(1000 * unixtime);
-		}
-
-		@Override
-		public boolean test(Event<I> evt) {
-			return unixtime.equals(evt.getUnixtime());
+		private Lower(long reference) {
+			super(milliseconds -> Long.compare(milliseconds, reference) < 0);
 		}
 
 	}
 
-	public static class Lower<I> implements IterableFilter<Event<I>> {
+	private static class Equals<I> extends EventFilterTime<I> {
 
-		private Unixtime unixtime;
-
-		private Lower(long unixtime) {
-			this.unixtime = new Unixtime(1000 * unixtime);
-		}
-
-		@Override
-		public boolean test(Event<I> evt) {
-			return 0 < unixtime.compareTo(evt.getUnixtime());
+		private Equals(long reference) {
+			super(milliseconds -> Long.compare(milliseconds, reference) == 0);
 		}
 
 	}
 
-	public static class Higher<I> implements IterableFilter<Event<I>> {
+	private static class Higher<I> extends EventFilterTime<I> {
 
-		private Unixtime unixtime;
-
-		private Higher(long unixtime) {
-			this.unixtime = new Unixtime(1000 * unixtime);
-		}
-
-		@Override
-		public boolean test(Event<I> evt) {
-			return unixtime.compareTo(evt.getUnixtime()) < 0;
+		private Higher(long reference) {
+			super(milliseconds -> 0 < Long.compare(milliseconds, reference));
 		}
 
 	}
 
-	public static class FieldEquals<I> implements IterableFilter<Event<I>> {
-
-		private int field;
-		private int value;
+	private static class FieldEquals<I> extends EventFilterTime<I> {
 
 		public FieldEquals(int field, int value) {
-			this.field = field;
-			this.value = value;
-		}
-
-		@Override
-		public boolean test(Event<I> evt) {
-			return value == evt.getUnixtime()
-					.get(field);
+			super(milliseconds -> value == new Unixtime(milliseconds).get(field));
 		}
 
 	}

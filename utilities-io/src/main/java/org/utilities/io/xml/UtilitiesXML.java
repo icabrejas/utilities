@@ -20,7 +20,7 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.utilities.core.lang.exception.QuietException;
 import org.utilities.core.lang.iterable.IterablePipe;
-import org.utilities.core.lang.iterable.UtilitiesIterable;
+import org.utilities.core.lang.iterable.IterablePipeSequence;
 import org.utilities.core.util.function.BiConsumerPlus;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -74,7 +74,7 @@ public class UtilitiesXML {
 
 	public static IterablePipe<Node> getChildNodes(Node node) {
 		NodeList children = node.getChildNodes();
-		return UtilitiesIterable.sequence(0, children.getLength() - 1)
+		return IterablePipeSequence.newInstance(0, children.getLength() - 1)
 				.map(children::item);
 	}
 
@@ -88,7 +88,7 @@ public class UtilitiesXML {
 
 	public static IterablePipe<Node> getAttributes(Node node) {
 		NamedNodeMap attributes = node.getAttributes();
-		return UtilitiesIterable.sequence(0, attributes.getLength() - 1)
+		return IterablePipeSequence.newInstance(0, attributes.getLength() - 1)
 				.map(attributes::item);
 	}
 
@@ -114,7 +114,7 @@ public class UtilitiesXML {
 		}
 	}
 
-		public static IterablePipe<Node> childs(NodeList node) {
+	public static IterablePipe<Node> childs(NodeList node) {
 		return IterablePipe.newInstance(node::item, node::getLength);
 	}
 
@@ -125,5 +125,5 @@ public class UtilitiesXML {
 	public static IterablePipe<Node> elementsByTagName(Document doc, String tagname) {
 		return childs(doc.getElementsByTagName(tagname));
 	}
-	
+
 }

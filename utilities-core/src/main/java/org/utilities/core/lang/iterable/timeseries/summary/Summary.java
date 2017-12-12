@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-import org.utilities.core.dataframe.MapDataEntry;
 import org.utilities.core.dataframe.entry.DataEntry;
+import org.utilities.core.dataframe.entry.DataEntryImpl;
 import org.utilities.core.dataframe.entry.value.DataValue;
 import org.utilities.core.lang.iterable.IterablePipe;
 import org.utilities.core.lang.iterable.timeseries.Event;
@@ -92,13 +92,13 @@ public interface Summary<I> extends Function<List<Event<I>>, Event<I>> {
 		private DataEntry summarize(Iterable<Event<I>> events) {
 			NotNullMap<String, List<DataValue>> rawValues = new NotNullMap<>(ArrayList::new);
 			for (Event<I> evt : events) {
-				for (String name : evt.names()) {
+				for (String name : evt.keys()) {
 					DataValue value = evt.get(name);
 					rawValues.get(name)
 							.add(value);
 				}
 			}
-			MapDataEntry summaryValues = new MapDataEntry();
+			DataEntryImpl summaryValues = new DataEntryImpl();
 			for (String label : rawValues.keySet()) {
 				summaryValues.put(label, summary.apply(rawValues.get(label)));
 			}

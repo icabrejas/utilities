@@ -22,6 +22,12 @@ public class LambdaValue<T> {
 	public T set(T value) {
 		return this.value = value;
 	}
+	
+	public T remove(){
+		T value = this.value;
+		this.value = null;
+		return value;
+	}
 
 	@Override
 	public String toString() {

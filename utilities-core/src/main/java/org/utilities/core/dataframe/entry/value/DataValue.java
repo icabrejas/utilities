@@ -92,7 +92,7 @@ public interface DataValue extends Comparable<DataValue> {
 
 	default DateDataValue add(int field, int amount) {
 		long millis = UtilitiesTime.add(longValue(), field, amount);
-		return new DateDataValue(new java.util.Date(millis));
+		return new DateDataValue(new Date(millis));
 	}
 
 }
