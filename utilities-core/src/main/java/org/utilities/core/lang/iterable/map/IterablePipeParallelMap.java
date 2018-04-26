@@ -56,7 +56,12 @@ public class IterablePipeParallelMap<T, R> implements IterablePipe<R> {
 		@Override
 		public boolean hasNext() {
 			fill();
-			return !tasks.isEmpty();
+			if (!tasks.isEmpty()) {
+				return true;
+			} else {
+				pool.shutdown();
+				return false;
+			}
 		}
 
 		@Override
