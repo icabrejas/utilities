@@ -27,11 +27,11 @@ public class UtilitiesScraping {
 	}
 
 	public static IterablePipe<Element> get(String url, String cssQuery) throws QuietException {
-		return IterablePipe.newInstance(get(url).select(cssQuery));
+		return IterablePipe.from(get(url).select(cssQuery));
 	}
 
 	public static IterablePipe<Element> getImg(String url) throws QuietException {
-		return IterablePipe.newInstance(get(url).select("img"));
+		return IterablePipe.from(get(url).select("img"));
 	}
 
 	public static InputStream getInputStream(String src) throws QuietException {

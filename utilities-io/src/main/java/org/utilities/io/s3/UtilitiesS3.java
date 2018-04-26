@@ -63,7 +63,7 @@ public class UtilitiesS3 {
 				.withPrefix(prefix.endsWith(DELIMITER) ? prefix : (prefix + DELIMITER))
 				.withDelimiter(DELIMITER);
 		ObjectListing objects = s3Client.listObjects(listObjectsRequest);
-		return IterablePipe.newInstance(objects.getCommonPrefixes());
+		return IterablePipe.from(objects.getCommonPrefixes());
 	}
 
 }

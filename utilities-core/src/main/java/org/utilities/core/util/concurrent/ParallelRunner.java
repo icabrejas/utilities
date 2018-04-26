@@ -9,7 +9,7 @@ public class ParallelRunner {
 
 	private ExecutorService pool = UtilitiesThread.newThreadPool();
 
-	public static ParallelRunner newInstance() {
+	public static ParallelRunner from() {
 		return new ParallelRunner();
 	}
 

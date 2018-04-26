@@ -1,10 +1,10 @@
-package org.utilities.core.lang.iterable.timeseries.filters;
+package org.utilities.timeseries.filter;
 
 import java.util.function.Predicate;
 
-import org.utilities.core.lang.iterable.timeseries.Event;
 import org.utilities.core.time.Unixtime;
 import org.utilities.core.util.function.PredicatePlus;
+import org.utilities.timeseries.Event;
 
 public class EventFilterTime<I> implements EventFilter<I> {
 

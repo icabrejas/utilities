@@ -15,7 +15,7 @@ public class ParallelCaller<T> implements Iterable<T> {
 	private ExecutorService pool = UtilitiesThread.newThreadPool();
 	private List<Future<T>> results = new ArrayList<>();
 
-	public static <T> ParallelCaller<T> newInstance() {
+	public static <T> ParallelCaller<T> from() {
 		return new ParallelCaller<T>();
 	}
 

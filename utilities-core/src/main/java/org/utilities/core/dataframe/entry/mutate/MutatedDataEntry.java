@@ -18,12 +18,12 @@ public class MutatedDataEntry implements DataEntry {
 		this.mutation = mutation;
 	}
 
-	public static MutatedDataEntry newInstance(DataEntry entry, Mutation mutation) {
+	public static MutatedDataEntry from(DataEntry entry, Mutation mutation) {
 		return new MutatedDataEntry(entry, mutation);
 	}
 
-	public static MutatedDataEntry newInstance(DataEntry entry, String name, Function<DataEntry, DataValue> mutation) {
-		return newInstance(entry, Mutation.dataEntryToDataValue(name, mutation));
+	public static MutatedDataEntry from(DataEntry entry, String name, Function<DataEntry, DataValue> mutation) {
+		return from(entry, Mutation.dataEntryToDataValue(name, mutation));
 	}
 
 	@Override

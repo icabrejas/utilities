@@ -15,24 +15,24 @@ public class IterablePipeSequence implements IterablePipe<Double> {
 		this.by = by;
 	}
 
-	public static IterablePipeSequence newInstance(double from, double to, double by) {
+	public static IterablePipeSequence from(double from, double to, double by) {
 		return new IterablePipeSequence(from, to, by);
 	}
 
-	public static IterablePipe<Integer> newInstance(int from, int to, int by) {
+	public static IterablePipe<Integer> from(int from, int to, int by) {
 		return new IterablePipeSequence(from, to, by).map(Double::intValue);
 	}
 
-	public static IterablePipe<Integer> newInstance(int from, int to) {
-		return newInstance(from, to, 1);
+	public static IterablePipe<Integer> from(int from, int to) {
+		return from(from, to, 1);
 	}
 
-	public static IterablePipe<Long> newInstance(long from, long to, long by) {
+	public static IterablePipe<Long> from(long from, long to, long by) {
 		return new IterablePipeSequence(from, to, by).map(Double::longValue);
 	}
 
-	public static IterablePipe<Long> newInstance(long from, long to) {
-		return newInstance(from, to, 1L);
+	public static IterablePipe<Long> from(long from, long to) {
+		return from(from, to, 1L);
 	}
 
 	@Override

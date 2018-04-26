@@ -28,7 +28,7 @@ public class BindedDataEntry implements DataEntry {
 	}
 
 	private Set<String> names(String prefix, DataEntry entry) {
-		return IterablePipe.newInstance(entry.keys())
+		return IterablePipe.from(entry.keys())
 				.map(BindedDataEntry::name, prefix)
 				.toSet();
 	}

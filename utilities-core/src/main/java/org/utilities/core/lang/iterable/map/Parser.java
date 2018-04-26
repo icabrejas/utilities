@@ -18,7 +18,7 @@ public class Parser<T, R> extends TrackerImpl<T> implements Mapper<T, R> {
 		this.type = type;
 	}
 
-	public static <T, R> Parser<T, R> newInstance(Class<T> input, Class<R> output) {
+	public static <T, R> Parser<T, R> from(Class<T> input, Class<R> output) {
 		return new Parser<>(output);
 	}
 

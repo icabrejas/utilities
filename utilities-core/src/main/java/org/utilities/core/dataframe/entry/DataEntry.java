@@ -82,11 +82,11 @@ public interface DataEntry {
 	}
 
 	default DataEntry select(Selection selection) {
-		return SelectedDataEntry.newInstance(this, selection);
+		return SelectedDataEntry.from(this, selection);
 	}
 
 	default DataEntry select(Collection<String> names) {
-		return select(Selection.newInstance(names));
+		return select(Selection.from(names));
 	}
 
 	default DataEntry select(String... names) {
@@ -94,11 +94,11 @@ public interface DataEntry {
 	}
 
 	default DataEntry remove(Selection selection) {
-		return RemovedDataEntry.newInstance(this, selection);
+		return RemovedDataEntry.from(this, selection);
 	}
 
 	default DataEntry remove(Collection<String> names) {
-		return remove(Selection.newInstance(names));
+		return remove(Selection.from(names));
 	}
 
 	default DataEntry remove(String... names) {
@@ -106,11 +106,11 @@ public interface DataEntry {
 	}
 
 	default <T> DataEntry mutate(Mutation mutation) {
-		return MutatedDataEntry.newInstance(this, mutation);
+		return MutatedDataEntry.from(this, mutation);
 	}
 
 	default <T> DataEntry mutate(String name, Function<DataEntry, DataValue> mutation) {
-		return MutatedDataEntry.newInstance(this, name, mutation);
+		return MutatedDataEntry.from(this, name, mutation);
 	}
 
 	default List<DataEntry> gather(String key, String value, String... names) {

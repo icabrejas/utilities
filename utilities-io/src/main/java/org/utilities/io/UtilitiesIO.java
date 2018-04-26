@@ -26,7 +26,7 @@ public class UtilitiesIO {
 
 	public static IterablePipe<File> dir(File src, boolean recursive) {
 		if (!recursive) {
-			return IterablePipe.newInstance(src.listFiles());
+			return IterablePipe.create(src.listFiles());
 		} else {
 			return IterableFiles.newInstance(src);
 		}

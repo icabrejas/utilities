@@ -20,7 +20,7 @@ public class IterablePipeWoven<T> implements IterablePipe<T> {
 		this.sources = sources;
 	}
 
-	public static <T> IterablePipeWoven<T> newInstance(Comparator<T> comparator,
+	public static <T> IterablePipeWoven<T> from(Comparator<T> comparator,
 			Iterable<? extends Iterable<T>> sources) {
 		Comparator<Map.Entry<Integer, T>> selector = Comparator.comparing(Map.Entry::getValue, comparator);
 		selector = selector.thenComparing(Map.Entry::getKey);
@@ -46,7 +46,7 @@ public class IterablePipeWoven<T> implements IterablePipe<T> {
 
 		public static <T> It<T> newInstace(Iterable<? extends Iterable<T>> sources,
 				Comparator<Map.Entry<Integer, T>> selector) {
-			List<Iterator<T>> iterators = IterablePipe.newInstance(sources)
+			List<Iterator<T>> iterators = IterablePipe.from(sources)
 					.map(Iterable::iterator)
 					.toList();
 			return new It<>(iterators, selector);

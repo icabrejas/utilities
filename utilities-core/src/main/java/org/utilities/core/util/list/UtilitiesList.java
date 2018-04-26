@@ -52,7 +52,7 @@ public class UtilitiesList {
 	}
 
 	public static <T> List<Integer> order(List<T> sample, Comparator<? super T> sorter) {
-		return IterablePipeSequence.newInstance(0, sample.size() - 1, 1)
+		return IterablePipeSequence.from(0, sample.size() - 1, 1)
 				.toList()
 				.stream()
 				.sorted((i, j) -> sorter.compare(sample.get(i), sample.get(j)))
@@ -64,7 +64,7 @@ public class UtilitiesList {
 	}
 
 	public static <T> List<T> quantiles(List<T> sample, int n, Comparator<T> sorter) {
-		List<Double> percentiles = IterablePipeSequence.newInstance(1., n, 1.)
+		List<Double> percentiles = IterablePipeSequence.from(1., n, 1.)
 				.map(x -> x / (n + 1))
 				.toList();
 		return quantiles(sample, percentiles, sorter);

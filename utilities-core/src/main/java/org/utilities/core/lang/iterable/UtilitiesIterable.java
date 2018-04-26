@@ -13,17 +13,17 @@ import org.utilities.core.util.pair.Pair;
 public class UtilitiesIterable {
 
 	public static <T, U, R> IterablePipe<R> apply(Iterable<T> x, Iterable<U> y, BiFunction<T, U, R> func) {
-		return IterablePipePair.newInstance(x, y)
+		return IterablePipePair.from(x, y)
 				.map(BiFunctionPlus.parseFunction(func));
 	}
 
 	public static <T, U, R> IterablePipe<R> apply(Iterable<T> x, Function<T, R> func) {
-		return IterablePipe.newInstance(x)
+		return IterablePipe.from(x)
 				.map(func);
 	}
 
 	public static <T> IterablePipe<T> filter(Iterable<T> it, Iterable<Boolean> sel) {
-		return IterablePipePair.newInstance(sel, it)
+		return IterablePipePair.from(sel, it)
 				.filter(Pair::getX)
 				.map(Pair::getY);
 	}

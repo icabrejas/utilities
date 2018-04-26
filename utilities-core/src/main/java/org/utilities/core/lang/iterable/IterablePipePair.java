@@ -16,7 +16,7 @@ public class IterablePipePair<X, Y> implements IterablePipe<Pair<X, Y>> {
 		this.y = y;
 	}
 
-	public static <X, Y> IterablePipePair<X, Y> newInstance(Iterable<X> x, Iterable<Y> y) {
+	public static <X, Y> IterablePipePair<X, Y> from(Iterable<X> x, Iterable<Y> y) {
 		return new IterablePipePair<>(x, y);
 	}
 

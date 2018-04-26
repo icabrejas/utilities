@@ -16,17 +16,17 @@ public class SelectedDataEntry implements DataEntry {
 		this.selection = selection;
 	}
 
-	public static SelectedDataEntry newInstance(DataEntry entry, Selection selection) {
+	public static SelectedDataEntry from(DataEntry entry, Selection selection) {
 		return new SelectedDataEntry(entry, selection);
 	}
 
-	public static SelectedDataEntry newInstance(DataEntry entry, Collection<String> keys) {
-		return newInstance(entry, Selection.newInstance(keys));
+	public static SelectedDataEntry from(DataEntry entry, Collection<String> keys) {
+		return from(entry, Selection.from(keys));
 	}
 
 	@Override
 	public Collection<String> keys() {
-		return IterablePipe.newInstance(entry.keys())
+		return IterablePipe.from(entry.keys())
 				.filter(selection::test)
 				.toList();
 	}

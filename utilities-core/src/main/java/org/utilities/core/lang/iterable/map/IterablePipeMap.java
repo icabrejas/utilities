@@ -15,7 +15,7 @@ public class IterablePipeMap<T, R> implements IterablePipe<R> {
 		this.mapper = mapper;
 	}
 
-	public static <T, R> IterablePipeMap<T, R> newInstance(Iterable<T> it, Mapper<T, R> mapper) {
+	public static <T, R> IterablePipeMap<T, R> from(Iterable<T> it, Mapper<T, R> mapper) {
 		return new IterablePipeMap<>(it, mapper);
 	}
 

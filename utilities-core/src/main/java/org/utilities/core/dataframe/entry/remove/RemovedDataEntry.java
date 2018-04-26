@@ -15,12 +15,12 @@ public class RemovedDataEntry implements DataEntry {
 		this.entry = new SelectedDataEntry(entry, selection.negate());
 	}
 
-	public static RemovedDataEntry newInstance(DataEntry entry, Selection selection) {
+	public static RemovedDataEntry from(DataEntry entry, Selection selection) {
 		return new RemovedDataEntry(entry, selection);
 	}
 
-	public static RemovedDataEntry newInstance(DataEntry entry, Collection<String> keys) {
-		return newInstance(entry, Selection.newInstance(keys));
+	public static RemovedDataEntry from(DataEntry entry, Collection<String> keys) {
+		return from(entry, Selection.from(keys));
 	}
 
 	@Override

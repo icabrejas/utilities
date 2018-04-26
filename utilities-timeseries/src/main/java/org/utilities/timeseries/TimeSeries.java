@@ -1,4 +1,4 @@
-package org.utilities.core.lang.iterable.timeseries;
+package org.utilities.timeseries;
 
 import java.util.Comparator;
 import java.util.Iterator;
@@ -8,14 +8,12 @@ import java.util.function.Function;
 import org.utilities.core.dataframe.entry.value.DataValue;
 import org.utilities.core.lang.exception.QuietException;
 import org.utilities.core.lang.iterable.IterablePipe;
-import org.utilities.core.lang.iterable.observer.Observer;
-import org.utilities.core.lang.iterable.observer.ObserverImpl;
-import org.utilities.core.lang.iterable.timeseries.filters.EventFilterTime;
-import org.utilities.core.lang.iterable.timeseries.filters.EventFilterValue;
-import org.utilities.core.lang.iterable.timeseries.summary.Summary;
+import org.utilities.core.lang.iterable.observer.IterablePipeObserved;
 import org.utilities.core.lang.iterable.weave.IterablePipeWoven;
 import org.utilities.core.time.UtilitiesTime;
-import org.utilities.core.util.lambda.LambdaValue;
+import org.utilities.timeseries.filter.EventFilterTime;
+import org.utilities.timeseries.filter.EventFilterValue;
+import org.utilities.timeseries.summary.Summary;
 
 public class TimeSeries<I> implements IterablePipe<Event<I>> {
 
@@ -26,21 +24,8 @@ public class TimeSeries<I> implements IterablePipe<Event<I>> {
 	}
 
 	public static <I, V> TimeSeries<I> newInstance(Iterable<Event<I>> events) {
-		LambdaValue<Event<I>> prev = new LambdaValue<>();
-		Observer<Event<I>> observer = new ObserverImpl<Event<I>>().start(() -> prev.set(null))
-				.next(TimeSeries::validate, prev);
-		events = IterablePipe.newInstance(events)
-				.observe(observer);
+		events = IterablePipeObserved.from(events, new TimeSeriesValidator<>());
 		return new TimeSeries<>(events);
-	}
-
-	private static <I> void validate(Event<I> next, LambdaValue<Event<I>> prev) {
-		Comparator<Event<I>> timeComparator = Event.timeComparator();
-		if (prev.isPresent() && (!next.infoEquals(prev.get()) || 0 <= timeComparator.compare(prev.get(), next))) {
-			// FIXME throw specific Exception
-			throw new RuntimeException();
-		}
-		prev.set(next);
 	}
 
 	@Override
@@ -74,9 +59,9 @@ public class TimeSeries<I> implements IterablePipe<Event<I>> {
 	}
 
 	public <W> TimeSeries<I> batch(long window, Function<List<Event<I>>, Event<I>> summary) {
-		return this.interval(Event::getTimeInUnix, window)
-				.map(summary)
-				.apply(TimeSeries::newInstance);
+		IterablePipe<Event<I>> events = this.interval(Event::getTimeInUnix, window)
+				.map(summary);
+		return new TimeSeries<>(events);
 	}
 
 	public <W> TimeSeries<I> batchByColumn(long window, Function<Iterable<DataValue>, DataValue> summary) {
@@ -84,9 +69,9 @@ public class TimeSeries<I> implements IterablePipe<Event<I>> {
 	}
 
 	public <W> TimeSeries<I> rollBatch(long window, Function<List<Event<I>>, Event<I>> summary) {
-		return this.rollInterval(Event::getTimeInUnix, window)
-				.map(summary)
-				.apply(TimeSeries::newInstance);
+		IterablePipe<Event<I>> events = this.rollInterval(Event::getTimeInUnix, window)
+				.map(summary);
+		return new TimeSeries<>(events);
 	}
 
 	public <W> TimeSeries<I> rollBatchByColumn(long window, Function<Iterable<DataValue>, DataValue> summary) {
@@ -96,7 +81,7 @@ public class TimeSeries<I> implements IterablePipe<Event<I>> {
 	public static TimeSeries<String> bindColumns(Iterable<TimeSeries<String>> series, String metainfo) {
 		Comparator<Event<String>> comparator = Event.timeComparator(String.class)
 				.thenComparing(Event.infoComparator(String.class));
-		IterablePipe<Event<String>> events = IterablePipeWoven.newInstance(comparator, series)
+		IterablePipe<Event<String>> events = IterablePipeWoven.from(comparator, series)
 				.batch(Event::timeEquals)
 				.flatMap(Event::bind, metainfo);
 		return new TimeSeries<>(events);

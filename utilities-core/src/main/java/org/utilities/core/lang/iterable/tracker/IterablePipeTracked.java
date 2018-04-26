@@ -15,7 +15,7 @@ public class IterablePipeTracked<T> implements IterablePipe<T> {
 		this.tracker = tracker;
 	}
 
-	public static <T> IterablePipeTracked<T> newInstance(Iterable<T> it, Tracker<T> tracker) {
+	public static <T> IterablePipeTracked<T> from(Iterable<T> it, Tracker<T> tracker) {
 		return new IterablePipeTracked<>(it, tracker);
 	}
 

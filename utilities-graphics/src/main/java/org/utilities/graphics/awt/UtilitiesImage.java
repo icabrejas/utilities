@@ -318,7 +318,7 @@ public class UtilitiesImage {
 			reader.setInput(inputStream);
 			IIOMetadata metadata = reader.getImageMetadata(0);
 			if (metadata != null) {
-				return IterablePipe.newInstance(metadata.getMetadataFormatNames())
+				return IterablePipe.create(metadata.getMetadataFormatNames())
 						.map(metadata::getAsTree)
 						.toList();
 			} else {

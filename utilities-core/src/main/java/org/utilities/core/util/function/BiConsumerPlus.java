@@ -5,7 +5,7 @@ import java.util.function.Function;
 
 public interface BiConsumerPlus<T, U> extends BiConsumer<T, U> {
 
-	public static <T, U> BiConsumerPlus<T, U> newInstance(BiConsumer<T, U> biConsumer) {
+	public static <T, U> BiConsumerPlus<T, U> from(BiConsumer<T, U> biConsumer) {
 		return biConsumer::accept;
 	}
 

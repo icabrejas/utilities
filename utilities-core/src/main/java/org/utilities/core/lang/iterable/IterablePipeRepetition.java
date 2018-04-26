@@ -14,7 +14,7 @@ public class IterablePipeRepetition<T> implements IterablePipe<T> {
 		this.times = times;
 	}
 
-	public static <T> IterablePipeRepetition<T> newInstance(Iterable<T> it, int times) {
+	public static <T> IterablePipeRepetition<T> from(Iterable<T> it, int times) {
 		return new IterablePipeRepetition<>(it, times);
 	}
 	

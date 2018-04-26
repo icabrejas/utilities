@@ -17,7 +17,7 @@ public class IterablePipeCartesian<X, Y> implements IterablePipe<Pair<X, Y>> {
 		this.y = y;
 	}
 
-	public static <X, Y> IterablePipeCartesian<X, Y> newInstance(Iterable<X> x, Iterable<Y> y) {
+	public static <X, Y> IterablePipeCartesian<X, Y> from(Iterable<X> x, Iterable<Y> y) {
 		return new IterablePipeCartesian<>(x, y);
 	}
 

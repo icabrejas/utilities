@@ -1,4 +1,4 @@
-package org.utilities.core.lang.iterable.timeseries.summary;
+package org.utilities.timeseries.summary;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
@@ -9,10 +9,10 @@ import org.utilities.core.dataframe.entry.DataEntry;
 import org.utilities.core.dataframe.entry.DataEntryImpl;
 import org.utilities.core.dataframe.entry.value.DataValue;
 import org.utilities.core.lang.iterable.IterablePipe;
-import org.utilities.core.lang.iterable.timeseries.Event;
 import org.utilities.core.time.Unixtime;
 import org.utilities.core.util.function.BiFunctionPlus;
 import org.utilities.core.util.map.NotNullMap;
+import org.utilities.timeseries.Event;
 
 public interface Summary<I> extends Function<List<Event<I>>, Event<I>> {
 
@@ -78,13 +78,13 @@ public interface Summary<I> extends Function<List<Event<I>>, Event<I>> {
 		}
 
 		private I metainfo(List<Event<I>> events) {
-			return IterablePipe.newInstance(events)
+			return IterablePipe.from(events)
 					.map(Event::getMetainfo)
 					.apply(this.metainfo);
 		}
 
 		private Unixtime unixtime(List<Event<I>> events) {
-			return IterablePipe.newInstance(events)
+			return IterablePipe.from(events)
 					.map(Event::getUnixtime)
 					.apply(this.unixtime);
 		}

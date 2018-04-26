@@ -46,7 +46,7 @@ public class UtilitiesThread {
 	}
 
 	public static <T> List<T> get(List<Future<T>> results) {
-		return IterablePipe.newInstance(results)
+		return IterablePipe.from(results)
 				.map(FunctionPlus.parseQuiet(Future::get))
 				.toList();
 	}

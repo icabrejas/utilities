@@ -57,7 +57,7 @@ public class UtilitiesFileChooser {
 
 	public static <T> IterablePipe<T> showOpenMultipleDialog(Function<File, T> mapper, String defaultPath,
 			String... fileExtension) {
-		return IterablePipe.newInstance(showOpenMultipleDialog(defaultPath, fileExtension))
+		return IterablePipe.create(showOpenMultipleDialog(defaultPath, fileExtension))
 				.map(mapper);
 	}
 

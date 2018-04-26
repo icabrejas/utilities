@@ -8,7 +8,6 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.utilities.core.dataframe.entry.DataEntryImpl;
 import org.utilities.core.dataframe.entry.value.DataValue;
 import org.utilities.core.lang.exception.QuietException;
-import org.utilities.core.lang.iterable.timeseries.Event;
 import org.utilities.core.time.Unixtime;
 import org.utilities.core.time.UtilitiesTime;
 import org.utilities.io.csv.UtilitiesCSV;
@@ -20,6 +19,7 @@ import org.utilities.io.gz.UtilitiesGZip;
 import org.utilities.io.json.UtilitiesJSON;
 import org.utilities.io.s3.EntryS3;
 import org.utilities.io.text.IterableLines;
+import org.utilities.timeseries.Event;
 
 import com.opencsv.bean.MappingStrategy;
 
@@ -173,7 +173,7 @@ public class UtilitiesIOMapping {
 				Function<String, Long> unixtime) {
 			I metainfo = entry.getMetainfo();
 			String dateTime = entry.getString(datetimeLabel);
-			Unixtime unixtime_ = Unixtime.newInstanceUnix(unixtime.apply(dateTime));
+			Unixtime unixtime_ = Unixtime.fromUnix(unixtime.apply(dateTime));
 			Event<I> evt = new Event<I>(metainfo, unixtime_);
 			put(entry, evt, datetimeLabel);
 			return evt;
@@ -200,7 +200,7 @@ public class UtilitiesIOMapping {
 			I metainfo = entry.getMetainfo();
 			String date = entry.getString(dateLabel);
 			String time = entry.getString(timeLabel);
-			Unixtime unixtime_ = Unixtime.newInstanceUnix(unixtime.apply(date, time));
+			Unixtime unixtime_ = Unixtime.fromUnix(unixtime.apply(date, time));
 			Event<I> evt = new Event<I>(metainfo, unixtime_);
 			put(entry, evt, dateLabel, timeLabel);
 			return evt;
@@ -220,4 +220,5 @@ public class UtilitiesIOMapping {
 		}
 
 	}
+	
 }

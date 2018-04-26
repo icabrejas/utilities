@@ -11,7 +11,7 @@ public interface Entry<I, T> {
 
 	T getContent();
 
-	public static <I, T> Entry<I, T> newInstance(Supplier<I> info, Supplier<T> content) {
+	public static <I, T> Entry<I, T> from(Supplier<I> info, Supplier<T> content) {
 		return new Entry<I, T>() {
 
 			@Override
@@ -27,15 +27,15 @@ public interface Entry<I, T> {
 	}
 
 	public static <I, T> Entry<I, T> newInstance(Supplier<I> info, T content) {
-		return newInstance(info, () -> content);
+		return from(info, () -> content);
 	}
 
 	public static <I, T> Entry<I, T> newInstance(I info, Supplier<T> content) {
-		return newInstance(() -> info, content);
+		return from(() -> info, content);
 	}
 
 	public static <I, T> Entry<I, T> newInstance(I info, T content) {
-		return newInstance(() -> info, () -> content);
+		return from(() -> info, () -> content);
 	}
 
 	public static <I, T1, T2> Function<Entry<I, T1>, Entry<I, T2>> entryMapper(Function<T1, T2> content) {
@@ -53,7 +53,7 @@ public interface Entry<I, T> {
 
 	public static <I1, T1, I2, T2> Function<Entry<I1, T1>, Entry<I2, T2>> entryMapper(FunctionPlus<I1, I2> info,
 			FunctionPlus<T1, T2> content) {
-		return entry -> Entry.newInstance(info.parseSupplier(entry.getInfo()),
+		return entry -> Entry.from(info.parseSupplier(entry.getInfo()),
 				content.parseSupplier(entry.getContent()));
 	}
 
@@ -62,7 +62,7 @@ public interface Entry<I, T> {
 	}
 
 	public static <T, I, R> Function<T, Entry<I, R>> mapper(FunctionPlus<T, I> info, FunctionPlus<T, R> content) {
-		return t -> Entry.newInstance(info.parseSupplier(t), content.parseSupplier(t));
+		return t -> Entry.from(info.parseSupplier(t), content.parseSupplier(t));
 	}
 
 }

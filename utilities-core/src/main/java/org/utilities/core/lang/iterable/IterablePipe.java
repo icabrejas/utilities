@@ -42,25 +42,25 @@ import org.utilities.core.util.function.Pipeline;
 
 public interface IterablePipe<T> extends Iterable<T> {
 
-	public static <T> IterablePipe<T> newInstance(Supplier<? extends Iterator<T>> it) {
+	public static <T> IterablePipe<T> from(Supplier<? extends Iterator<T>> it) {
 		return it::get;
 	}
 
-	public static <T, U> IterablePipe<U> newInstance(Function<T, ? extends Iterator<U>> it, T t) {
-		return newInstance(FunctionPlus.parseSupplier(it, t));
+	public static <T, U> IterablePipe<U> from(Function<T, ? extends Iterator<U>> it, T t) {
+		return from(FunctionPlus.parseSupplier(it, t));
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <T> IterablePipe<T> newInstance(Class<T> type) {
-		return IterablePipe.newInstance();
+	public static <T> IterablePipe<T> from(Class<T> type) {
+		return IterablePipe.create();
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <T> IterablePipe<T> newInstance(T... t) {
-		return IterablePipe.newInstance(Arrays.asList(t));
+	public static <T> IterablePipe<T> create(T... t) {
+		return IterablePipe.from(Arrays.asList(t));
 	}
 
-	public static <T> IterablePipe<T> newInstance(Iterable<T> it) {
+	public static <T> IterablePipe<T> from(Iterable<T> it) {
 		return it::iterator;
 	}
 

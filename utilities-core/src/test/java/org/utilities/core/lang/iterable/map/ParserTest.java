@@ -10,7 +10,7 @@ public class ParserTest extends TestCase {
 	public void test() {
 		A a = new A();
 		a.setFieldA("123");
-		B b = Parser.newInstance(A.class, B.class)
+		B b = Parser.from(A.class, B.class)
 				.parseInt("fieldB", A::getFieldA)
 				.map(a);
 		assertEquals(new Integer(123), b.getFieldB());

@@ -35,6 +35,8 @@
     <module>utilities-resources</module>
     <module>utilities-orm</module>
 <!--    <module>utilities-twitter</module> -->
-	</modules>
+    <module>utilities-timeseries</module>
+    <module>utilities-symbolicmath</module>
+  </modules>
 	
 </project>

@@ -15,6 +15,10 @@ public class IterablePipeObserved<T> implements IterablePipe<T> {
 		this.observer = observer;
 	}
 
+	public static <T> IterablePipeObserved<T> from(Iterable<T> it, Observer<T> observer) {
+		return new IterablePipeObserved<>(it, observer);
+	}
+
 	@Override
 	public Iterator<T> iterator() {
 		return new It<>(it.iterator(), observer);

@@ -8,7 +8,7 @@ import org.utilities.core.util.pair.Pair;
 
 public interface BiFunctionPlus<T, U, R> extends BiFunction<T, U, R> {
 
-	public static <T, U, R> BiFunctionPlus<T, U, R> newInstance(BiFunction<T, U, R> biFunction) {
+	public static <T, U, R> BiFunctionPlus<T, U, R> from(BiFunction<T, U, R> biFunction) {
 		return biFunction::apply;
 	}
 

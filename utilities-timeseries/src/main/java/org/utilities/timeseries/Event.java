@@ -1,4 +1,4 @@
-package org.utilities.core.lang.iterable.timeseries;
+package org.utilities.timeseries;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -17,7 +17,6 @@ import org.utilities.core.time.Unixtime;
 public class Event<I> implements DataEntry {
 
 	private I metainfo;
-	// TODO ¿is the correct class (maybe this class is unnecessary)?
 	private Unixtime unixtime;
 	private DataEntry values = new DataEntryImpl();
 

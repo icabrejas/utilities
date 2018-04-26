@@ -14,16 +14,16 @@ public interface Selection extends PredicatePlus<String> {
 		return PredicatePlus.super.negate()::test;
 	}
 
-	public static SelectionImpl newInstance(Set<String> keys) {
+	public static SelectionImpl from(Set<String> keys) {
 		return new SelectionImpl(keys);
 	}
 
-	public static SelectionImpl newInstance(Collection<String> keys) {
-		return newInstance(new HashSet<>(keys));
+	public static SelectionImpl from(Collection<String> keys) {
+		return from(new HashSet<>(keys));
 	}
 
-	public static SelectionImpl newInstance(String... keys) {
-		return newInstance(Arrays.asList(keys));
+	public static SelectionImpl from(String... keys) {
+		return from(Arrays.asList(keys));
 	}
 
 }

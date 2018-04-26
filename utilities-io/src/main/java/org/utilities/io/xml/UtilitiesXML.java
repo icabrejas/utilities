@@ -74,7 +74,7 @@ public class UtilitiesXML {
 
 	public static IterablePipe<Node> getChildNodes(Node node) {
 		NodeList children = node.getChildNodes();
-		return IterablePipeSequence.newInstance(0, children.getLength() - 1)
+		return IterablePipeSequence.from(0, children.getLength() - 1)
 				.map(children::item);
 	}
 
@@ -88,7 +88,7 @@ public class UtilitiesXML {
 
 	public static IterablePipe<Node> getAttributes(Node node) {
 		NamedNodeMap attributes = node.getAttributes();
-		return IterablePipeSequence.newInstance(0, attributes.getLength() - 1)
+		return IterablePipeSequence.from(0, attributes.getLength() - 1)
 				.map(attributes::item);
 	}
 

@@ -100,7 +100,7 @@ public class ImageScraping {
 	}
 
 	private static String first(Iterable<String> it) {
-		List<String> list = IterablePipe.newInstance(it)
+		List<String> list = IterablePipe.from(it)
 				.limit(1)
 				.toList();
 		return !list.isEmpty() ? list.get(0) : null;

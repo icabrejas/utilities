@@ -18,15 +18,15 @@ public class Unixtime implements Comparable<Unixtime> {
 		this.milliseconds = milliseconds;
 	}
 
-	public static Unixtime newInstance() {
+	public static Unixtime from() {
 		return new Unixtime();
 	}
 
-	public static Unixtime newInstanceMillis(long millis) {
+	public static Unixtime fromMillis(long millis) {
 		return new Unixtime(millis);
 	}
 
-	public static Unixtime newInstanceUnix(long unix) {
+	public static Unixtime fromUnix(long unix) {
 		return new Unixtime(1000 * unix);
 	}
 
