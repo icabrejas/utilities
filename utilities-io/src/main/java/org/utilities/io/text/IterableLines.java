@@ -15,16 +15,16 @@ import org.utilities.io.IteratorCloseable;
 
 public class IterableLines<I> implements IterablePipe<EntryLine<I>> {
 
-	private I metainfo;
+	private I metadata;
 	private Supplier<? extends Reader> reader;
 
-	public IterableLines(I metainfo, Supplier<? extends Reader> reader) {
-		this.metainfo = metainfo;
+	public IterableLines(I metadata, Supplier<? extends Reader> reader) {
+		this.metadata = metadata;
 		this.reader = reader;
 	}
 
-	public static <I> IterableLines<I> newInstance(I metainfo, Supplier<? extends Reader> reader) {
-		return new IterableLines<>(metainfo, reader);
+	public static <I> IterableLines<I> newInstance(I metadata, Supplier<? extends Reader> reader) {
+		return new IterableLines<>(metadata, reader);
 	}
 
 	public static IterableLines<File> newInstance(String pathname) {
@@ -36,23 +36,23 @@ public class IterableLines<I> implements IterablePipe<EntryLine<I>> {
 		return new IterableLines<>(file, reader);
 	}
 
-	public I getMetainfo() {
-		return metainfo;
+	public I getMetadata() {
+		return metadata;
 	}
 
 	@Override
 	public IteratorCloseable<EntryLine<I>> iterator() {
-		It<I> it = new It<>(metainfo, new LineIterator(reader.get()));
+		It<I> it = new It<>(metadata, new LineIterator(reader.get()));
 		return new IteratorCloseable<>(it, it);
 	}
 
 	private static class It<I> implements Iterator<EntryLine<I>>, Closeable {
 
-		private I metainfo;
+		private I metadata;
 		private LineIterator it;
 
-		public It(I metainfo, LineIterator it) {
-			this.metainfo = metainfo;
+		public It(I metadata, LineIterator it) {
+			this.metadata = metadata;
 			this.it = it;
 		}
 
@@ -68,7 +68,7 @@ public class IterableLines<I> implements IterablePipe<EntryLine<I>> {
 
 		@Override
 		public EntryLine<I> next() {
-			return new EntryLine<>(metainfo, it.next());
+			return new EntryLine<>(metadata, it.next());
 		}
 
 	}

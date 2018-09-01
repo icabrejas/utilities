@@ -1,12 +1,13 @@
 package org.utilities.symbolicmath.algebra;
 
+import org.utilities.symbolicmath.Algebra;
 import org.utilities.symbolicmath.operator.BinaryOperator;
 import org.utilities.symbolicmath.value.Value;
 
 public class Multiplication<S> extends BinaryOperator<S, Double, Double, Double> {
 
 	public Multiplication(Value<S, Double> a, Value<S, Double> b) {
-		super(AlgebraUtils::multiply, a, b);
+		super(Algebra::multiply, a, b);
 	}
 
 }

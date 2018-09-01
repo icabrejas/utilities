@@ -1,9 +1,13 @@
-package org.utilities.symbolicmath.algebra;
+package org.utilities.symbolicmath;
 
-public class AlgebraUtils {
+public class Algebra {
 
 	public static double add(double a, double b) {
 		return a + b;
+	}
+
+	public static double opposite(double a) {
+		return -a;
 	}
 
 	public static double subtract(double a, double b) {
@@ -16,6 +20,10 @@ public class AlgebraUtils {
 
 	public static double divide(double a, double b) {
 		return a / b;
+	}
+
+	public static double inverse(double a) {
+		return 1. / a;
 	}
 
 	public static double square(double a) {

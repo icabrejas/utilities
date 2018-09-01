@@ -54,8 +54,8 @@ public class UtilitiesGZip {
 		return new EntryGZip<>(file, SupplierPlus.parseQuiet(() -> new FileInputStream(file)));
 	}
 
-	public static <I> EntryGZip<I> newEntryGZip(I metainfo, Supplier<InputStream> inputStream) {
-		return new EntryGZip<>(metainfo, inputStream);
+	public static <I> EntryGZip<I> newEntryGZip(I metadata, Supplier<InputStream> inputStream) {
+		return new EntryGZip<>(metadata, inputStream);
 	}
 
 	public static GZIPInputStream getInputStream(File file) {

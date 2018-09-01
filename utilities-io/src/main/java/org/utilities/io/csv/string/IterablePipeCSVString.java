@@ -17,18 +17,18 @@ import com.opencsv.CSVReader;
 
 public class IterablePipeCSVString<I> implements IterablePipe<EntryCSVString<I>> {
 
-	private I metainfo;
+	private I metadata;
 	private CSVReaderBuilder reader;
 	private boolean headers = true;
 	private boolean trim = false;
 
-	public IterablePipeCSVString(I metainfo, Supplier<? extends Reader> reader) {
-		this.metainfo = metainfo;
+	public IterablePipeCSVString(I metadata, Supplier<? extends Reader> reader) {
+		this.metadata = metadata;
 		this.reader = new CSVReaderBuilder(reader);
 	}
 
-	public IterablePipeCSVString<I> metainfo(I metainfo) {
-		this.metainfo = metainfo;
+	public IterablePipeCSVString<I> metadata(I metadata) {
+		this.metadata = metadata;
 		return this;
 	}
 
@@ -85,7 +85,7 @@ public class IterablePipeCSVString<I> implements IterablePipe<EntryCSVString<I>>
 	@Override
 	public IteratorCloseable<EntryCSVString<I>> iterator() {
 		try {
-			IterablePipeCSVString.It<I> it = new IterablePipeCSVString.It<>(metainfo, reader.get(), headers, trim);
+			IterablePipeCSVString.It<I> it = new IterablePipeCSVString.It<>(metadata, reader.get(), headers, trim);
 			return new IteratorCloseable<>(it, it);
 		} catch (FileNotFoundException e) {
 			throw new QuietException(e);
@@ -102,13 +102,13 @@ public class IterablePipeCSVString<I> implements IterablePipe<EntryCSVString<I>>
 
 	private static class It<I> implements Iterator<EntryCSVString<I>>, Closeable {
 
-		private I metainfo;
+		private I metadata;
 		private IteratorCloseable<String[]> it;
 		private String[] headers;
 		private boolean trim;
 
-		public It(I metainfo, CSVReader reader, boolean headers, boolean trim) throws FileNotFoundException {
-			this.metainfo = metainfo;
+		public It(I metadata, CSVReader reader, boolean headers, boolean trim) throws FileNotFoundException {
+			this.metadata = metadata;
 			this.it = new IteratorCloseable<>(reader.iterator(), reader);
 			if (headers && it.hasNext()) {
 				this.headers = it.next();
@@ -123,7 +123,7 @@ public class IterablePipeCSVString<I> implements IterablePipe<EntryCSVString<I>>
 
 		@Override
 		public EntryCSVString<I> next() {
-			EntryCSVString<I> entry = new EntryCSVString<>(metainfo);
+			EntryCSVString<I> entry = new EntryCSVString<>(metadata);
 			String[] fields = it.next();
 			for (int i = 0; i < headers.length; i++) {
 				if (trim) {

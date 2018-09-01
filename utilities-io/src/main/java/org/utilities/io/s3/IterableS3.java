@@ -15,15 +15,19 @@ public class IterableS3 implements IterablePipe<EntryS3> {
 
 	private AmazonS3 s3Client;
 	private Supplier<ListObjectsV2Request> request;
+	private int trials;
+	private long waitTime;
 
-	public IterableS3(AmazonS3 s3Client, Supplier<ListObjectsV2Request> request) {
+	public IterableS3(AmazonS3 s3Client, Supplier<ListObjectsV2Request> request, int trials, long waitTime) {
 		this.s3Client = s3Client;
 		this.request = request;
+		this.trials = trials;
+		this.waitTime = waitTime;
 	}
 
 	@Override
 	public Iterator<EntryS3> iterator() {
-		return new It(s3Client, request.get());
+		return new It(s3Client, request.get(), trials, waitTime);
 	}
 
 	private static class It implements Iterator<EntryS3> {
@@ -32,10 +36,14 @@ public class IterableS3 implements IterablePipe<EntryS3> {
 		private ListObjectsV2Request request;
 		private ListObjectsV2Result pageMarker;
 		private Iterator<S3ObjectSummary> pageContent;
+		private int trials;
+		private long waitTime;
 
-		public It(AmazonS3 s3Client, ListObjectsV2Request request) {
+		public It(AmazonS3 s3Client, ListObjectsV2Request request, int trials, long waitTime) {
 			this.s3Client = s3Client;
 			this.request = request;
+			this.trials = trials;
+			this.waitTime = waitTime;
 			nextPage();
 		}
 
@@ -59,7 +67,7 @@ public class IterableS3 implements IterablePipe<EntryS3> {
 			if (!hasNext()) {
 				throw new NoSuchElementException();
 			}
-			return EntryS3.newInstance(s3Client, pageContent.next());
+			return EntryS3.newInstance(s3Client, pageContent.next(), trials, waitTime);
 		}
 
 	}

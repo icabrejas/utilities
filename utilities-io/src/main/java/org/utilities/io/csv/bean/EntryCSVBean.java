@@ -2,16 +2,16 @@ package org.utilities.io.csv.bean;
 
 public class EntryCSVBean<I, T> {
 
-	private I metainfo;
+	private I metadata;
 	private T bean;
 
-	public EntryCSVBean(I metainfo, T bean) {
-		this.metainfo = metainfo;
+	public EntryCSVBean(I metadata, T bean) {
+		this.metadata = metadata;
 		this.bean = bean;
 	}
 
-	public I getMetainfo() {
-		return metainfo;
+	public I getMetadata() {
+		return metadata;
 	}
 
 	public T getBean() {
@@ -20,7 +20,7 @@ public class EntryCSVBean<I, T> {
 
 	@Override
 	public String toString() {
-		return "EntryCSVBean [metainfo=" + metainfo + ", bean=" + bean + "]";
+		return "EntryCSVBean [metadata=" + metadata + ", bean=" + bean + "]";
 	}
 
 	@Override
@@ -28,7 +28,7 @@ public class EntryCSVBean<I, T> {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((bean == null) ? 0 : bean.hashCode());
-		result = prime * result + ((metainfo == null) ? 0 : metainfo.hashCode());
+		result = prime * result + ((metadata == null) ? 0 : metadata.hashCode());
 		return result;
 	}
 
@@ -46,10 +46,10 @@ public class EntryCSVBean<I, T> {
 				return false;
 		} else if (!bean.equals(other.bean))
 			return false;
-		if (metainfo == null) {
-			if (other.metainfo != null)
+		if (metadata == null) {
+			if (other.metadata != null)
 				return false;
-		} else if (!metainfo.equals(other.metainfo))
+		} else if (!metadata.equals(other.metadata))
 			return false;
 		return true;
 	}

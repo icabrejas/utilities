@@ -49,13 +49,15 @@ public class UtilitiesS3 {
 		return s3Client.getObject(bucketName, key);
 	}
 
-	public static IterableS3 getAll(AmazonS3 s3Client, Supplier<ListObjectsV2Request> request) {
-		return new IterableS3(s3Client, request);
+	public static IterableS3 getAll(AmazonS3 s3Client, Supplier<ListObjectsV2Request> request, int trials,
+			long waitTime) {
+		return new IterableS3(s3Client, request, trials, waitTime);
 	}
 
-	public static IterableS3 getAllByPrefix(AmazonS3 s3Client, String bucketName, String prefix) {
+	public static IterableS3 getAllByPrefix(AmazonS3 s3Client, String bucketName, String prefix, int trials,
+			long waitTime) {
 		return getAll(s3Client, () -> new ListObjectsV2Request().withBucketName(bucketName)
-				.withPrefix(prefix));
+				.withPrefix(prefix), trials, waitTime);
 	}
 
 	public static IterablePipe<String> dir(AmazonS3 s3Client, String bucketName, String prefix) {

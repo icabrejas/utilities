@@ -171,10 +171,10 @@ public class UtilitiesIOMapping {
 
 		public static <I> Event<I> parseEvent(EntryCSVString<I> entry, String datetimeLabel,
 				Function<String, Long> unixtime) {
-			I metainfo = entry.getMetainfo();
+			I metadata = entry.getMetadata();
 			String dateTime = entry.getString(datetimeLabel);
 			Unixtime unixtime_ = Unixtime.fromUnix(unixtime.apply(dateTime));
-			Event<I> evt = new Event<I>(metainfo, unixtime_);
+			Event<I> evt = new Event<I>(metadata, unixtime_);
 			put(entry, evt, datetimeLabel);
 			return evt;
 		}
@@ -197,11 +197,11 @@ public class UtilitiesIOMapping {
 
 		public static <I> Event<I> parseEvent(EntryCSVString<I> entry, String dateLabel, String timeLabel,
 				BiFunction<String, String, Long> unixtime) {
-			I metainfo = entry.getMetainfo();
+			I metadata = entry.getMetadata();
 			String date = entry.getString(dateLabel);
 			String time = entry.getString(timeLabel);
 			Unixtime unixtime_ = Unixtime.fromUnix(unixtime.apply(date, time));
-			Event<I> evt = new Event<I>(metainfo, unixtime_);
+			Event<I> evt = new Event<I>(metadata, unixtime_);
 			put(entry, evt, dateLabel, timeLabel);
 			return evt;
 		}
@@ -220,5 +220,5 @@ public class UtilitiesIOMapping {
 		}
 
 	}
-	
+
 }

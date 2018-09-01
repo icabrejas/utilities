@@ -12,5 +12,5 @@ public class Constant<S, V> implements Value<S, V> {
 	public V apply(S store) {
 		return value;
 	}
-	
+
 }

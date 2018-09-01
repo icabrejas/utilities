@@ -32,12 +32,12 @@ public class S3Bucket {
 		return UtilitiesS3.get(s3Client, bucketName, key);
 	}
 
-	public IterableS3 getAll(Supplier<ListObjectsV2Request> request) {
-		return UtilitiesS3.getAll(s3Client, request);
+	public IterableS3 getAll(Supplier<ListObjectsV2Request> request, int trials, long waitTime) {
+		return UtilitiesS3.getAll(s3Client, request, trials, waitTime);
 	}
 
-	public IterableS3 getAllByPrefix(String prefix) {
-		return UtilitiesS3.getAllByPrefix(s3Client, bucketName, prefix);
+	public IterableS3 getAllByPrefix(String prefix, int trials, long waitTime) {
+		return UtilitiesS3.getAllByPrefix(s3Client, bucketName, prefix, trials, waitTime);
 	}
 
 	public IterablePipe<String> dir(String prefix) {

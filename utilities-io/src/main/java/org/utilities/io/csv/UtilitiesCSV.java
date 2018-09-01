@@ -32,9 +32,9 @@ public class UtilitiesCSV {
 		}
 	}
 
-	public static <I, T> IterableCSVBean<I, T> newIterableCSVBean(I metainfo, Supplier<? extends Reader> reader,
+	public static <I, T> IterableCSVBean<I, T> newIterableCSVBean(I metadata, Supplier<? extends Reader> reader,
 			MappingStrategy<T> strategy) {
-		return new IterableCSVBean<>(metainfo, reader, strategy);
+		return new IterableCSVBean<>(metadata, reader, strategy);
 	}
 
 	public static <T> IterableCSVBean<File, T> newIterableCSVBean(File file, MappingStrategy<T> strategy) {
@@ -42,8 +42,8 @@ public class UtilitiesCSV {
 		return newIterableCSVBean(file, reader, strategy);
 	}
 
-	public static <I> IterablePipeCSVString<I> newIterableCSVString(I metainfo, Supplier<? extends Reader> reader) {
-		return new IterablePipeCSVString<>(metainfo, reader);
+	public static <I> IterablePipeCSVString<I> newIterableCSVString(I metadata, Supplier<? extends Reader> reader) {
+		return new IterablePipeCSVString<>(metadata, reader);
 	}
 
 	public static IterablePipeCSVString<File> newIterableCSVString(File file) {

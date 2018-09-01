@@ -12,27 +12,31 @@ import com.amazonaws.services.s3.model.S3ObjectSummary;
 
 public abstract class EntryS3 implements EntryIO<String> {
 
-	public static EntryS3 newInstance(AmazonS3 s3Client, S3ObjectSummary summary) {
-		return new Summary(s3Client, summary);
+	public static EntryS3 newInstance(AmazonS3 s3Client, S3ObjectSummary summary, int trials, long waitTime) {
+		return new Summary(s3Client, summary, trials, waitTime);
 	}
 
-	public static EntryS3 newInstance(AmazonS3 s3Client, GetObjectRequest request) {
-		return new Request(s3Client, request);
+	public static EntryS3 newInstance(AmazonS3 s3Client, GetObjectRequest request, int trials, long waitTime) {
+		return new Request(s3Client, request, trials, waitTime);
 	}
 
-	public static EntryS3 newInstance(AmazonS3 s3Client, String bucketName, String key) {
+	public static EntryS3 newInstance(AmazonS3 s3Client, String bucketName, String key, int trials, long waitTime) {
 		GetObjectRequest request = new GetObjectRequest(bucketName, key);
-		return newInstance(s3Client, request);
+		return newInstance(s3Client, request, trials, waitTime);
 	}
 
 	private static class Request extends EntryS3 {
 
 		private AmazonS3 s3Client;
 		private GetObjectRequest request;
+		private int trials;
+		private long waitTime;
 
-		public Request(AmazonS3 s3Client, GetObjectRequest request) {
+		public Request(AmazonS3 s3Client, GetObjectRequest request, int trials, long waitTime) {
 			this.s3Client = s3Client;
 			this.request = request;
+			this.trials = trials;
+			this.waitTime = waitTime;
 		}
 
 		@Override
@@ -42,6 +46,10 @@ public abstract class EntryS3 implements EntryIO<String> {
 
 		@Override
 		public InputStream getContent() {
+			return SupplierPlus.Noisy.tryToGet(this::getObjectContent, trials, waitTime);
+		}
+
+		private S3ObjectInputStream getObjectContent() {
 			return UtilitiesS3.get(request, s3Client)
 					.getObjectContent();
 		}
@@ -52,15 +60,19 @@ public abstract class EntryS3 implements EntryIO<String> {
 
 		private AmazonS3 s3Client;
 		private S3ObjectSummary summary;
+		private int trials;
+		private long waitTime;
 
-		public Summary(AmazonS3 s3Client, S3ObjectSummary summary) {
+		public Summary(AmazonS3 s3Client, S3ObjectSummary summary, int trials, long waitTime) {
 			this.s3Client = s3Client;
 			this.summary = summary;
+			this.trials = trials;
+			this.waitTime = waitTime;
 		}
 
 		@Override
 		public InputStream getContent() {
-			return SupplierPlus.Noisy.tryToGet(this::getObjectContent, 3);
+			return SupplierPlus.Noisy.tryToGet(this::getObjectContent, trials, waitTime);
 		}
 
 		private S3ObjectInputStream getObjectContent() {

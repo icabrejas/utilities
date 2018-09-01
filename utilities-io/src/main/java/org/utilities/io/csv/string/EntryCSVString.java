@@ -3,18 +3,17 @@ package org.utilities.io.csv.string;
 import java.util.Map;
 
 import org.utilities.core.dataframe.entry.DataEntryImpl;
-import org.utilities.core.dataframe.entry.value.DataValue;
 
 public class EntryCSVString<I> extends DataEntryImpl {
 
-	private I metainfo;
+	private I metadata;
 
-	public EntryCSVString(I metainfo) {
-		this.metainfo = metainfo;
+	public EntryCSVString(I metadata) {
+		this.metadata = metadata;
 	}
 
-	public EntryCSVString(I metainfo, Map<String, String> cells) {
-		this.metainfo = metainfo;
+	public EntryCSVString(I metadata, Map<String, String> cells) {
+		this.metadata = metadata;
 		cells.entrySet()
 				.stream()
 				.forEach(this::put);
@@ -29,20 +28,20 @@ public class EntryCSVString<I> extends DataEntryImpl {
 		return get(label).stringValue();
 	}
 
-	public I getMetainfo() {
-		return metainfo;
+	public I getMetadata() {
+		return metadata;
 	}
 
 	@Override
 	public String toString() {
-		return "EntryCSVString [metainfo=" + metainfo + "]";
+		return "EntryCSVString [metadata=" + metadata + "]";
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((metainfo == null) ? 0 : metainfo.hashCode());
+		result = prime * result + ((metadata == null) ? 0 : metadata.hashCode());
 		return result;
 	}
 
@@ -55,10 +54,10 @@ public class EntryCSVString<I> extends DataEntryImpl {
 		if (getClass() != obj.getClass())
 			return false;
 		EntryCSVString<?> other = (EntryCSVString<?>) obj;
-		if (metainfo == null) {
-			if (other.metainfo != null)
+		if (metadata == null) {
+			if (other.metadata != null)
 				return false;
-		} else if (!metainfo.equals(other.metainfo))
+		} else if (!metadata.equals(other.metadata))
 			return false;
 		return super.equals(obj);
 	}

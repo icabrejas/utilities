@@ -4,25 +4,25 @@ import java.util.function.BiFunction;
 
 import org.utilities.symbolicmath.value.Value;
 
-public class BinaryOperator<S, A, B, V> implements Value<S, V> {
+public class BinaryOperator<S, X, Y, V> implements Value<S, V> {
 
-	private BiFunction<A, B, V> func;
-	private Value<S, A> a;
-	private Value<S, B> b;
+	private BiFunction<X, Y, V> func;
+	private Value<S, X> x;
+	private Value<S, Y> y;
 
-	public BinaryOperator(BiFunction<A, B, V> func, Value<S, A> a, Value<S, B> b) {
+	public BinaryOperator(BiFunction<X, Y, V> func, Value<S, X> x, Value<S, Y> y) {
 		this.func = func;
-		this.a = a;
-		this.b = b;
+		this.x = x;
+		this.y = y;
 	}
 
 	@Override
 	public V apply(S store) {
-		A a = this.a.apply(store);
-		if (a != null) {
-			B b = this.b.apply(store);
-			if (b != null) {
-				return func.apply(a, b);
+		X x = this.x.apply(store);
+		if (x != null) {
+			Y y = this.y.apply(store);
+			if (y != null) {
+				return func.apply(x, y);
 			}
 		}
 		return null;

@@ -26,7 +26,8 @@ public class EntryGZip<I> implements EntryIO<I> {
 	@Override
 	public GZIPInputStream getContent() throws QuietException {
 		try {
-			return new GZIPInputStream(inputStream.get());
+			InputStream inputStream = this.inputStream.get();
+			return new GZIPInputStream(inputStream);
 		} catch (IOException e) {
 			throw new QuietException(e);
 		}

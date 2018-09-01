@@ -45,10 +45,10 @@ public class SemaphoreImpl<T> extends TrackerImpl<T> implements Semaphore<T> {
 
 			@Override
 			public boolean store(T prev, T next) {
-				if (++counter <= dim) {
+				if (++counter < dim) {
 					return true;
 				} else {
-					counter = 1;
+					counter = 0;
 					return false;
 				}
 			}

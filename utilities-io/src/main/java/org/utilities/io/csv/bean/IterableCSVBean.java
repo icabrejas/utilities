@@ -19,18 +19,18 @@ import com.opencsv.bean.MappingStrategy;
 
 public class IterableCSVBean<I, T> implements IterablePipe<EntryCSVBean<I, T>> {
 
-	private I metainfo;
+	private I metadata;
 	private CSVReaderBuilder reader;
 	private MappingStrategy<T> strategy;
 
-	public IterableCSVBean(I metainfo, Supplier<? extends Reader> reader, MappingStrategy<T> strategy) {
-		this.metainfo = metainfo;
+	public IterableCSVBean(I metadata, Supplier<? extends Reader> reader, MappingStrategy<T> strategy) {
+		this.metadata = metadata;
 		this.reader = new CSVReaderBuilder(reader);
 		this.strategy = strategy;
 	}
 
-	public IterableCSVBean<I, T> metainfo(I metainfo) {
-		this.metainfo = metainfo;
+	public IterableCSVBean<I, T> metadata(I metadata) {
+		this.metadata = metadata;
 		return this;
 	}
 
@@ -72,7 +72,7 @@ public class IterableCSVBean<I, T> implements IterablePipe<EntryCSVBean<I, T>> {
 	@Override
 	public IteratorCloseable<EntryCSVBean<I, T>> iterator() {
 		try {
-			IterableCSVBean.It<I, T> it = new IterableCSVBean.It<>(metainfo, reader, strategy);
+			IterableCSVBean.It<I, T> it = new IterableCSVBean.It<>(metadata, reader, strategy);
 			return new IteratorCloseable<>(it, it);
 		} catch (FileNotFoundException e) {
 			throw new QuietException(e);
@@ -89,13 +89,13 @@ public class IterableCSVBean<I, T> implements IterablePipe<EntryCSVBean<I, T>> {
 
 	private static class It<I, T> implements Iterator<EntryCSVBean<I, T>>, Closeable {
 
-		private I metainfo;
+		private I metadata;
 		private IteratorCloseable<T> iteratorCloseable;
 
-		public It(I metainfo, Supplier<CSVReader> reader, MappingStrategy<T> strategy) throws FileNotFoundException {
+		public It(I metadata, Supplier<CSVReader> reader, MappingStrategy<T> strategy) throws FileNotFoundException {
 			CSVReader reader_ = reader.get();
 			IterableCSVToBean<T> it = new IterableCSVToBean<>(reader_, strategy, null);
-			this.metainfo = metainfo;
+			this.metadata = metadata;
 			this.iteratorCloseable = new IteratorCloseable<>(it.iterator(), reader_);
 		}
 
@@ -106,7 +106,7 @@ public class IterableCSVBean<I, T> implements IterablePipe<EntryCSVBean<I, T>> {
 
 		@Override
 		public EntryCSVBean<I, T> next() {
-			return new EntryCSVBean<>(metainfo, iteratorCloseable.next());
+			return new EntryCSVBean<>(metadata, iteratorCloseable.next());
 		}
 
 		@Override

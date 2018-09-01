@@ -4,20 +4,23 @@ import java.util.function.Function;
 
 import org.utilities.symbolicmath.value.Value;
 
-public class UnaryOperator<S, A, V> implements Value<S, V> {
+public class UnaryOperator<S, X, V> implements Value<S, V> {
 
-	private Function<A, V> func;
-	private Value<S, A> a;
+	private Function<X, V> func;
+	private Value<S, X> x;
 
-	public UnaryOperator(Function<A, V> func, Value<S, A> a) {
+	public UnaryOperator(Function<X, V> func, Value<S, X> x) {
 		this.func = func;
-		this.a = a;
+		this.x = x;
 	}
 
 	@Override
 	public V apply(S store) {
-		A a = this.a.apply(store);
-		return a != null ? func.apply(a) : null;
+		X x = this.x.apply(store);
+		if (x != null) {
+			return func.apply(x);
+		}
+		return null;
 	}
 
 }
