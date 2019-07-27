@@ -1,7 +1,8 @@
 package org.utilities.core.lang.iterable.tracker;
 
-import java.io.Closeable;
+import java.util.function.Consumer;
 
+import org.utilities.core.util.function.ConsumerPlus;
 import org.utilities.core.util.function.RunnablePlus;
 
 public class TrackerImpl<T> implements Tracker<T> {
@@ -14,14 +15,18 @@ public class TrackerImpl<T> implements Tracker<T> {
 		start.run();
 	}
 
+	@Override
+	public void onEnd() {
+		end.run();
+	}
+
 	public TrackerImpl<T> start(Runnable start) {
 		this.start = start;
 		return this;
 	}
 
-	@Override
-	public void onEnd() {
-		end.run();
+	public <R> TrackerImpl<T> start(Consumer<R> start, R r) {
+		return start(ConsumerPlus.parseRunnable(start, r));
 	}
 
 	public TrackerImpl<T> end(Runnable end) {
@@ -29,9 +34,8 @@ public class TrackerImpl<T> implements Tracker<T> {
 		return this;
 	}
 
-	// TODO move to utilities-io
-	public static <T> TrackerImpl<T> closer(Closeable closeable) {
-		return new TrackerImpl<T>().end(RunnablePlus.parseQuiet(closeable::close));
+	public <R> TrackerImpl<T> end(Consumer<R> end, R r) {
+		return end(ConsumerPlus.parseRunnable(end, r));
 	}
 
 }

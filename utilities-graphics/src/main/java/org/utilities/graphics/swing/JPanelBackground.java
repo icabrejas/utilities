@@ -46,7 +46,7 @@ public class JPanelBackground extends JPanel {
 
 	private void printImage(Graphics g) {
 		if (img != null) {
-			UtilitiesImage.drawImage(this, img, fitMode);
+			UtilitiesImage.Graphics.drawImage(g, img, fitMode, 0);
 		}
 	}
 

@@ -7,7 +7,7 @@ import org.utilities.core.lang.exception.QuietException;
 
 public class ParallelRunner {
 
-	private ExecutorService pool = UtilitiesThread.newThreadPool();
+	private ExecutorService pool = UtilitiesConcurrent.newThreadPool();
 
 	public static ParallelRunner from() {
 		return new ParallelRunner();
@@ -29,7 +29,7 @@ public class ParallelRunner {
 			pool.shutdown();
 		}
 		if (wait) {
-			UtilitiesThread.wait(pool);
+			UtilitiesConcurrent.waitQuietly(pool);
 		}
 	}
 

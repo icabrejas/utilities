@@ -1,18 +1,19 @@
 package org.utilities.graphics.awt;
 
-
 import java.awt.AlphaComposite;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.RenderingHints.Key;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
+import java.awt.image.BufferedImageOp;
+import java.awt.image.ConvolveOp;
+import java.awt.image.Kernel;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -62,122 +63,119 @@ public class UtilitiesImage {
 	private UtilitiesImage() {
 	}
 
-	public static void applyRenderingHints(Graphics2D g2) {
-		g2.setRenderingHints(HINTS);
-	}
+	public static class IO {
 
-	public static BufferedImage readQuietly(File input) throws QuietException {
-		try {
-			return ImageIO.read(input);
-		} catch (IOException e) {
-			throw new QuietException(e);
+		public static BufferedImage readQuietly(File input) throws QuietException {
+			try {
+				return ImageIO.read(input);
+			} catch (IOException e) {
+				throw new QuietException(e);
+			}
 		}
-	}
 
-	public static BufferedImage readQuietly(InputStream input) throws QuietException {
-		try {
-			return ImageIO.read(input);
-		} catch (IOException e) {
-			throw new QuietException(e);
+		public static BufferedImage readQuietly(InputStream input) throws QuietException {
+			try {
+				return ImageIO.read(input);
+			} catch (IOException e) {
+				throw new QuietException(e);
+			}
 		}
-	}
 
-	public static BufferedImage readQuietly(byte[] bytes) throws QuietException {
-		try (InputStream inputStream = new ByteArrayInputStream(bytes);) {
-			return ImageIO.read(inputStream);
-		} catch (IOException e) {
-			throw new QuietException(e);
+		public static BufferedImage readQuietly(byte[] bytes) throws QuietException {
+			try (InputStream inputStream = new ByteArrayInputStream(bytes);) {
+				return ImageIO.read(inputStream);
+			} catch (IOException e) {
+				throw new QuietException(e);
+			}
 		}
-	}
 
-	public static byte[] toByteArrayQuietly(BufferedImage img, String formatName) throws QuietException {
-		try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream();) {
-			ImageIO.write(img, formatName, outputStream);
-			return outputStream.toByteArray();
-		} catch (IOException e) {
-			throw new QuietException(e);
+		public static byte[] toByteArrayQuietly(BufferedImage image, String formatName) throws QuietException {
+			try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream();) {
+				ImageIO.write(image, formatName, outputStream);
+				return outputStream.toByteArray();
+			} catch (IOException e) {
+				throw new QuietException(e);
+			}
 		}
-	}
 
-	public static void writeQuietly(BufferedImage image, File output) throws QuietException {
-		try {
-			ImageIO.write(image, UtilitiesIO.extension(output), output);
-		} catch (IOException e) {
-			throw new QuietException(e);
+		public static void writeQuietly(BufferedImage image, File output) throws QuietException {
+			try {
+				ImageIO.write(image, UtilitiesIO.extension(output), output);
+			} catch (IOException e) {
+				throw new QuietException(e);
+			}
 		}
-	}
 
-	public static void writeQuietly(BufferedImage image, String formatName, OutputStream output) throws QuietException {
-		try {
-			ImageIO.write(image, formatName, output);
-		} catch (IOException e) {
-			throw new QuietException(e);
+		public static void writeQuietly(BufferedImage image, String formatName, OutputStream output)
+				throws QuietException {
+			try {
+				ImageIO.write(image, formatName, output);
+			} catch (IOException e) {
+				throw new QuietException(e);
+			}
 		}
-	}
 
-	public static void compress(BufferedImage image, OutputStream outputStream, float quality) throws QuietException {
-		try {
-			ImageOutputStream imageOutputStream = ImageIO.createImageOutputStream(outputStream);
-			ImageWriter writer = ImageIO.getImageWritersByFormatName("jpg")
-					.next();
-			writer.setOutput(imageOutputStream);
-			ImageWriteParam params = writer.getDefaultWriteParam();
-			params.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
-			params.setCompressionQuality(quality);
-			writer.write(null, new IIOImage(image, null, null), params);
-			writer.dispose();
-		} catch (IOException e) {
-			throw new QuietException(e);
+		public static void compress(BufferedImage image, OutputStream outputStream, String formatName, float quality)
+				throws QuietException {
+			try {
+				ImageOutputStream imageOutputStream = ImageIO.createImageOutputStream(outputStream);
+				ImageWriter writer = ImageIO.getImageWritersByFormatName(formatName)
+						.next();
+				writer.setOutput(imageOutputStream);
+				ImageWriteParam params = writer.getDefaultWriteParam();
+				params.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+				params.setCompressionQuality(quality);
+				writer.write(null, new IIOImage(image, null, null), params);
+				writer.dispose();
+			} catch (IOException e) {
+				throw new QuietException(e);
+			}
 		}
-	}
 
-	public static void transferToClipBoard(BufferedImage img) {
-		TransferableImage transferableImage = new TransferableImage(img);
-		UtilitiesAWT.transferToClipBoard(transferableImage);
-	}
-
-	public static BufferedImage rotate(BufferedImage img, double angle) {
-		int width = (int) (img.getWidth() * Math.cos(angle) + img.getHeight() * Math.sin(angle));
-		int height = (int) (img.getWidth() * Math.sin(angle) + img.getHeight() * Math.cos(angle));
-		BufferedImage rotated = new BufferedImage(width, height, img.getType());
-		Graphics2D g = rotated.createGraphics();
-		g.rotate(angle, width / 2, height / 2);
-		g.drawImage(img, (img.getWidth() - width) / 2, (img.getHeight() - height) / 2, null);
-		return rotated;
-	}
-
-	public static BufferedImage scale(BufferedImage img, double sx, double sy, boolean aspectRatio) {
-		AffineTransform scale = null;
-		int width, height;
-		if (aspectRatio) {
-			double s = Math.min(sx, sy);
-			scale = AffineTransform.getScaleInstance(s, s);
-			width = (int) Math.round(s * img.getWidth());
-			height = (int) Math.round(s * img.getHeight());
-		} else {
-			scale = AffineTransform.getScaleInstance(sx, sy);
-			width = (int) Math.round(sx * img.getWidth());
-			height = (int) Math.round(sy * img.getHeight());
+		public static void transferToClipBoard(BufferedImage image) {
+			TransferableImage transferableImage = new TransferableImage(image);
+			UtilitiesAWT.transferToClipBoard(transferableImage);
 		}
-		BufferedImage dest = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_INT_RGB);
-		Graphics2D g2 = (Graphics2D) dest.getGraphics();
-		applyRenderingHints(g2);
-		g2.drawImage(img, 0, 0, img.getWidth(), img.getHeight(), null);
-		img = dest;
-		dest = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-		AffineTransformOp affineTransform = new AffineTransformOp(scale, HINTS);
-		affineTransform.filter(img, dest);
-		return dest;
-	}
 
-	public static BufferedImage scale(BufferedImage img, Dimension dim, boolean aspectRatio) {
-		double sx = dim.getWidth() / img.getWidth();
-		double sy = dim.getHeight() / img.getHeight();
-		return scale(img, sx, sy, aspectRatio);
-	}
+		public static InputStream createInputStream(BufferedImage image, String formatName) throws QuietException {
+			return new ByteArrayInputStream(toByteArrayQuietly(image, formatName));
+		}
 
-	public static BufferedImage scale(BufferedImage img, double s) {
-		return scale(img, s, s, true);
+		public static List<Node> getMetadata(BufferedImage image, String formatName) throws QuietException {
+			try (InputStream iputStream = createInputStream(image, formatName);
+					ImageInputStream imageIputStream = ImageIO.createImageInputStream(iputStream);) {
+				return getMetadata(imageIputStream);
+			} catch (IOException e) {
+				throw new QuietException(e);
+			}
+		}
+
+		public static List<Node> getMetadata(File file) throws QuietException {
+			try (ImageInputStream inputStream = ImageIO.createImageInputStream(file);) {
+				return getMetadata(inputStream);
+			} catch (IOException e) {
+				throw new QuietException(e);
+			}
+		}
+
+		private static List<Node> getMetadata(ImageInputStream inputStream) throws QuietException {
+			try {
+				ImageReader reader = ImageIO.getImageReaders(inputStream)
+						.next();
+				reader.setInput(inputStream);
+				IIOMetadata metadata = reader.getImageMetadata(0);
+				if (metadata != null) {
+					return IterablePipe.create(metadata.getMetadataFormatNames())
+							.map(metadata::getAsTree)
+							.toList();
+				} else {
+					return Collections.emptyList();
+				}
+			} catch (IOException e) {
+				throw new QuietException(e);
+			}
+		}
+
 	}
 
 	public static class Base64 {
@@ -187,146 +185,291 @@ public class UtilitiesImage {
 
 		public static BufferedImage decode(String base64) throws QuietException {
 			byte[] bytes = DECODER.decode(base64);
-			return readQuietly(bytes);
+			return IO.readQuietly(bytes);
 
 		}
 
-		public static String encode(BufferedImage img, String formatName) throws QuietException {
-			byte[] bytes = toByteArrayQuietly(img, formatName);
+		public static String encode(BufferedImage image, String formatName) throws QuietException {
+			byte[] bytes = IO.toByteArrayQuietly(image, formatName);
 			return ENCODER.encodeToString(bytes);
 		}
 
 	}
 
-	public static void drawImage(Component component, BufferedImage img, FitMode fitMode) {
-		Graphics g = component.getGraphics();
-		Dimension src_dim = new Dimension(img.getWidth(), img.getHeight());
-		Rectangle bounds = fit(src_dim, component.getSize(), fitMode);
-		img = scale(img, bounds.getSize(), true);
-		g.drawImage(img, bounds.x, bounds.y, bounds.width, bounds.height, component);
-	}
+	public static class Tranform {
 
-	public static Rectangle fit(Dimension src, Dimension container, FitMode fitMode) {
-		switch (fitMode) {
-		case LEFT:
-			return fitLeft(src, container);
-		case TOP:
-			return fitTop(src, container);
-		case RIGHT:
-			return fitRight(src, container);
-		case BOTTON:
-			return fitBotton(src, container);
-		case CENTER:
-			return fitCenter(src, container);
-		case EXPAND:
-			return fitExpand(src, container);
-		default:
-			return null;
+		public static BufferedImage rotate(BufferedImage image, double angle) {
+			int width = (int) (image.getWidth() * Math.cos(angle) + image.getHeight() * Math.sin(angle));
+			int height = (int) (image.getWidth() * Math.sin(angle) + image.getHeight() * Math.cos(angle));
+			BufferedImage rotated = new BufferedImage(width, height, image.getType());
+			Graphics2D g = rotated.createGraphics();
+			g.rotate(angle, width / 2, height / 2);
+			g.drawImage(image, (image.getWidth() - width) / 2, (image.getHeight() - height) / 2, null);
+			return rotated;
 		}
-	}
 
-	public static Rectangle fitLeft(Dimension src, Dimension container) {
-		int width = Math.round((float) (src.width * container.height) / src.height);
-		return new Rectangle(0, 0, width, container.height);
-	}
+		public static BufferedImage scale(BufferedImage image, double sx, double sy, boolean aspectRatio) {
+			AffineTransform scale = null;
+			int width, height;
+			if (aspectRatio) {
+				double s = Math.min(sx, sy);
+				scale = AffineTransform.getScaleInstance(s, s);
+				width = (int) Math.round(s * image.getWidth());
+				height = (int) Math.round(s * image.getHeight());
+			} else {
+				scale = AffineTransform.getScaleInstance(sx, sy);
+				width = (int) Math.round(sx * image.getWidth());
+				height = (int) Math.round(sy * image.getHeight());
+			}
+			BufferedImage dest = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
+			Graphics.get(dest)
+					.drawImage(image, 0, 0, image.getWidth(), image.getHeight(), null);
+			image = dest;
+			dest = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+			AffineTransformOp affineTransform = new AffineTransformOp(scale, HINTS);
+			affineTransform.filter(image, dest);
+			return dest;
+		}
 
-	public static Rectangle fitTop(Dimension src, Dimension container) {
-		int height = Math.round((float) (src.height * container.width) / src.width);
-		return new Rectangle(0, 0, container.width, height);
-	}
+		public static BufferedImage scale(BufferedImage image, Dimension dim, boolean aspectRatio) {
+			double sx = dim.getWidth() / image.getWidth();
+			double sy = dim.getHeight() / image.getHeight();
+			return scale(image, sx, sy, aspectRatio);
+		}
 
-	public static Rectangle fitRight(Dimension src, Dimension container) {
-		int width = Math.round((float) (src.width * container.height) / src.height);
-		return new Rectangle(container.width - width, 0, width, container.height);
-	}
+		public static BufferedImage scale(BufferedImage image, double s) {
+			return scale(image, s, s, true);
+		}
 
-	public static Rectangle fitBotton(Dimension src, Dimension container) {
-		int height = Math.round((float) (src.height * container.width) / src.width);
-		return new Rectangle(0, container.height - height, container.width, height);
-	}
+		public static BufferedImage addAlphaBorder(BufferedImage image, int border) {
+			int width = image.getWidth() + 2 * border;
+			int height = image.getHeight() + 2 * border;
+			BufferedImage expandedImg = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+			Graphics.get(expandedImg)
+					.drawImage(image, border, border, null);
+			return expandedImg;
+		}
 
-	public static Rectangle fitCenter(Dimension src, Dimension container) {
-		float factor = Math.min((float) container.width / src.width, (float) container.height / src.height);
-		int width = Math.round(container.width - src.width * factor);
-		int height = Math.round(container.height - src.height * factor);
-		return new Rectangle(width / 2, height / 2, container.width - width, container.height - height);
-	}
+		public static BufferedImage translucent(BufferedImage image, float alpha) {
+			BufferedImage translucent = new BufferedImage(image.getWidth(), image.getHeight(),
+					BufferedImage.TRANSLUCENT);
+			Graphics2D g = translucent.createGraphics();
+			g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
+			g.drawImage(image, null, 0, 0);
+			g.dispose();
+			return translucent;
+		}
 
-	public static Rectangle fitExpand(Dimension src, Dimension container) {
-		return new Rectangle(0, 0, container.width, container.height);
-	}
-
-	public static BufferedImage translucent(BufferedImage image, float alpha) {
-		BufferedImage translucent = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TRANSLUCENT);
-		Graphics2D g = translucent.createGraphics();
-		g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
-		g.drawImage(image, null, 0, 0);
-		g.dispose();
-		return translucent;
-	}
-
-	public static BufferedImage translucent(BufferedImage image, Color color, float alpha) {
-		BufferedImage translucent = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
-		Color translucentColor = new Color(color.getRed(), color.getGreen(), color.getBlue(), (int) (255 * alpha));
-		for (int x = 0; x < translucent.getWidth(); x++) {
-			for (int y = 0; y < translucent.getHeight(); y++) {
-				if (translucent.getRGB(x, y) == color.getRGB()) {
-					translucent.setRGB(x, y, 0x8F1C1C);
-				} else {
-					translucent.setRGB(x, y, translucentColor.getRGB());
+		// FIXME
+		public static BufferedImage translucent(BufferedImage image, Color color, float alpha) {
+			BufferedImage translucent = new BufferedImage(image.getWidth(), image.getHeight(),
+					BufferedImage.TYPE_INT_ARGB);
+			Color translucentColor = new Color(color.getRed(), color.getGreen(), color.getBlue(), (int) (255 * alpha));
+			for (int x = 0; x < translucent.getWidth(); x++) {
+				for (int y = 0; y < translucent.getHeight(); y++) {
+					if (image.getRGB(x, y) == color.getRGB()) {
+						translucent.setRGB(x, y, 0x8F1C1C);
+					} else {
+						translucent.setRGB(x, y, translucentColor.getRGB());
+					}
 				}
 			}
+			return translucent;
 		}
-		return translucent;
-	}
 
-	public static byte[] toByteArray(BufferedImage image) throws QuietException {
-		try {
-			ByteArrayOutputStream arrayOutputStream = new ByteArrayOutputStream();
-			ImageIO.write(image, "jpeg", arrayOutputStream);
-			return arrayOutputStream.toByteArray();
-		} catch (IOException e) {
-			throw new QuietException(e);
-		}
-	}
-
-	public static InputStream createInputStream(BufferedImage image) throws QuietException {
-		return new ByteArrayInputStream(toByteArray(image));
-	}
-
-	public static List<Node> getMetadata(BufferedImage image) throws QuietException {
-		try (InputStream iputStream = createInputStream(image);
-				ImageInputStream imageIputStream = ImageIO.createImageInputStream(iputStream);) {
-			return getMetadata(imageIputStream);
-		} catch (IOException e) {
-			throw new QuietException(e);
-		}
-	}
-
-	public static List<Node> getMetadata(File file) throws QuietException {
-		try (ImageInputStream inputStream = ImageIO.createImageInputStream(file);) {
-			return getMetadata(inputStream);
-		} catch (IOException e) {
-			throw new QuietException(e);
-		}
-	}
-
-	private static List<Node> getMetadata(ImageInputStream inputStream) throws QuietException {
-		try {
-			ImageReader reader = ImageIO.getImageReaders(inputStream)
-					.next();
-			reader.setInput(inputStream);
-			IIOMetadata metadata = reader.getImageMetadata(0);
-			if (metadata != null) {
-				return IterablePipe.create(metadata.getMetadataFormatNames())
-						.map(metadata::getAsTree)
-						.toList();
-			} else {
-				return Collections.emptyList();
+		public static BufferedImage shadow(BufferedImage image, Color color) {
+			BufferedImage shadow = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
+			for (int i = 0; i < shadow.getWidth(); i++) {
+				for (int j = 0; j < shadow.getHeight(); j++) {
+					Color pixel = new Color(image.getRGB(i, j), true);
+					pixel = new Color(color.getRed(), color.getGreen(), color.getBlue(), pixel.getAlpha());
+					shadow.setRGB(i, j, pixel.getRGB());
+				}
 			}
-		} catch (IOException e) {
-			throw new QuietException(e);
+			return shadow;
 		}
+
+		public static BufferedImageOp blurFilter(int blur) {
+			float[] data = new float[blur * blur];
+			for (int i = 0; i < data.length; i++) {
+				data[i] = 1f / (blur * blur);
+			}
+			Kernel kernel = new Kernel(blur, blur, data);
+			return new ConvolveOp(kernel);
+		}
+
+		public static BufferedImage blur(BufferedImage image, int blur) {
+			return UtilitiesImage.Tranform.blurFilter(blur)
+					.filter(image, null);
+		}
+
 	}
 
+	public static class Graphics {
+
+		public static Graphics2D get(BufferedImage image) {
+			Graphics2D g2 = (Graphics2D) image.getGraphics();
+			applyRenderingHints(g2);
+			return g2;
+		}
+
+		public static void applyRenderingHints(Graphics2D g2) {
+			g2.setRenderingHints(HINTS);
+		}
+
+		public static void drawImage(java.awt.Graphics g, BufferedImage image, FitMode fitMode, int alphaBorder) {
+			Dimension src = Bounds.getSize(image);
+			Rectangle container = g.getClipBounds();
+			Rectangle clip = Bounds.fitSize(src, container, fitMode);
+			drawImage(g, image, clip, alphaBorder);
+		}
+
+		public static void drawImage(java.awt.Graphics g, BufferedImage image, Rectangle clip, int alphaBorder) {
+			if (clip.getWidth() != image.getWidth() || clip.getHeight() != image.getHeight()) {
+				image = Tranform.scale(image, clip.getSize(), true);
+			}
+			if (0 < alphaBorder) {
+				image = Tranform.addAlphaBorder(image, alphaBorder);
+				g.drawImage(image, clip.x - alphaBorder, clip.y - alphaBorder, null);
+			} else {
+				g.drawImage(image, clip.x, clip.y, null);
+			}
+		}
+
+	}
+
+	public static class Bounds {
+
+		public static Rectangle getBounds(BufferedImage image) {
+			return new Rectangle(0, 0, image.getWidth(), image.getHeight());
+		}
+
+		public static Dimension getSize(BufferedImage image) {
+			return new Dimension(image.getWidth(), image.getHeight());
+		}
+
+		public static Point fitLocation(Dimension src, Dimension dest, FitMode fitMode) {
+			return fitLocation(new Rectangle(src), new Rectangle(dest), fitMode);
+		}
+
+		public static Point fitLocation(Rectangle src, Rectangle dest, FitMode fitMode) {
+			switch (fitMode) {
+			case LEFT:
+				return fitLocationLeft(src, dest);
+			case TOP:
+				return fitLocationTop(src, dest);
+			case RIGHT:
+				return fitLocationRight(src, dest);
+			case BOTTON:
+				return fitLocationBotton(src, dest);
+			case CENTER:
+				return fitLocationCenter(src, dest);
+			default:
+				return null;
+			}
+		}
+
+		private static Point fitLocationLeft(Rectangle src, Rectangle dest) {
+			double tx = dest.getX() - src.getX();
+			double ty = dest.getCenterY() - src.getCenterY();
+			return new Point((int) tx, (int) ty);
+		}
+
+		private static Point fitLocationTop(Rectangle src, Rectangle dest) {
+			double tx = dest.getCenterX() - src.getCenterX();
+			double ty = dest.getY() - src.getY();
+			return new Point((int) tx, (int) ty);
+		}
+
+		private static Point fitLocationRight(Rectangle src, Rectangle dest) {
+			double tx = (dest.getCenterX() + dest.getWidth()) - (src.getCenterX() + src.getWidth());
+			double ty = dest.getCenterY() - src.getCenterY();
+			return new Point((int) tx, (int) ty);
+		}
+
+		private static Point fitLocationBotton(Rectangle src, Rectangle dest) {
+			double tx = dest.getCenterX() - src.getCenterX();
+			double ty = (dest.getCenterY() + dest.getHeight()) - (src.getCenterY() + src.getHeight());
+			return new Point((int) tx, (int) ty);
+		}
+
+		private static Point fitLocationCenter(Rectangle src, Rectangle dest) {
+			double tx = dest.getCenterX() - src.getCenterX();
+			double ty = dest.getCenterY() - src.getCenterY();
+			return new Point((int) tx, (int) ty);
+		}
+
+		public static Rectangle fitSize(Dimension src, Rectangle container, FitMode fitMode) {
+			switch (fitMode) {
+			case LEFT:
+				return fitSizeLeft(src, container);
+			case TOP:
+				return fitSizeTop(src, container);
+			case RIGHT:
+				return fitSizeRight(src, container);
+			case BOTTON:
+				return fitSizeBotton(src, container);
+			case CENTER:
+				return fitSizeCenter(src, container);
+			default:
+				return null;
+			}
+		}
+
+		public static Rectangle fitSizeLeft(Dimension src, Rectangle container) {
+			int width = fitWidth(src, container);
+			return new Rectangle(container.x, container.y, width, container.height);
+		}
+
+		public static Rectangle fitSizeTop(Dimension src, Rectangle container) {
+			int height = fitHeight(src, container);
+			return new Rectangle(container.x, container.y, container.width, height);
+		}
+
+		public static Rectangle fitSizeRight(Dimension src, Rectangle container) {
+			int width = fitWidth(src, container);
+			int x = container.x + container.width - width;
+			return new Rectangle(x, container.y, width, container.height);
+		}
+
+		public static Rectangle fitSizeBotton(Dimension src, Rectangle container) {
+			int height = fitHeight(src, container);
+			int y = container.y + container.height - height;
+			return new Rectangle(container.x, y, container.width, height);
+		}
+
+		public static Rectangle fitSizeCenter(Dimension src, Rectangle container) {
+			float factor = fitFactor(src, container);
+			int width = Math.round(src.width * factor);
+			int height = Math.round(src.height * factor);
+			int x = container.x + (container.width - width) / 2;
+			int y = container.y + (container.height - height) / 2;
+			return new Rectangle(x, y, width, height);
+		}
+
+		public static int fitWidth(Dimension src, Rectangle container) {
+			return Math.round(src.width * fitHeightFactor(src, container));
+		}
+
+		public static int fitHeight(Dimension src, Rectangle container) {
+			return Math.round(src.height * fitWidthFactor(src, container));
+		}
+
+		public static float fitFactor(Dimension src, Rectangle container) {
+			return Math.min(fitWidthFactor(src, container), fitHeightFactor(src, container));
+		}
+
+		public static float fitHeightFactor(Dimension src, Rectangle container) {
+			return (float) container.height / src.height;
+		}
+
+		public static float fitWidthFactor(Dimension src, Rectangle container) {
+			return (float) container.width / src.width;
+		}
+
+		public static Dimension scale(Dimension src, float factor) {
+			return new Dimension((int) (factor * src.width), (int) (factor * src.height));
+		}
+
+	}
 }

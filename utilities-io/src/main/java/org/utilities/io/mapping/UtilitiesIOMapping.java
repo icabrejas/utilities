@@ -1,23 +1,20 @@
 package org.utilities.io.mapping;
 
+import java.time.Instant;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-import org.apache.commons.lang3.ArrayUtils;
-import org.utilities.core.dataframe.entry.DataEntryImpl;
-import org.utilities.core.dataframe.entry.value.DataValue;
 import org.utilities.core.lang.exception.QuietException;
-import org.utilities.core.time.Unixtime;
 import org.utilities.core.time.UtilitiesTime;
+import org.utilities.dataframe.dataentry.DataEntry;
 import org.utilities.io.csv.UtilitiesCSV;
 import org.utilities.io.csv.bean.IterableCSVBean;
-import org.utilities.io.csv.string.EntryCSVString;
-import org.utilities.io.csv.string.IterablePipeCSVString;
-import org.utilities.io.gz.EntryGZip;
+import org.utilities.io.csv.string.IterablePipeCSV;
+import org.utilities.io.gz.GZipIOEntry;
 import org.utilities.io.gz.UtilitiesGZip;
 import org.utilities.io.json.UtilitiesJSON;
-import org.utilities.io.s3.EntryS3;
+import org.utilities.io.s3.S3IOEntry;
 import org.utilities.io.text.IterableLines;
 import org.utilities.timeseries.Event;
 
@@ -33,57 +30,57 @@ public class UtilitiesIOMapping {
 		private GZip() {
 		}
 
-		public static <I> IterableLines<I> parseLines(EntryGZip<I> gz) {
-			return new IterableLines<>(gz.getInfo(), gz::getReader);
+		public static IterableLines parseLines(GZipIOEntry gz) {
+			return new IterableLines(gz::getReader);
 		}
 
-		public static <I> IterablePipeCSVString<I> parseCSV(EntryGZip<I> gz) throws QuietException {
-			return UtilitiesCSV.newIterableCSVString(gz.getInfo(), gz::getReader);
+		public static IterablePipeCSV parseCSV(GZipIOEntry gz) throws QuietException {
+			return UtilitiesCSV.newInstance(gz::getReader);
 		}
 
-		public static <I, T> IterableCSVBean<I, T> parseCSV(EntryGZip<I> gz, MappingStrategy<T> strategy)
+		public static <T> IterableCSVBean<T> parseCSV(GZipIOEntry gz, MappingStrategy<T> strategy)
 				throws QuietException {
-			return UtilitiesCSV.newIterableCSVBean(gz.getInfo(), gz::getReader, strategy);
+			return UtilitiesCSV.newInstance(gz::getReader, strategy);
 		}
 
-		public static <I, T> Function<EntryGZip<I>, IterableCSVBean<I, T>> parseCSVMapper(MappingStrategy<T> strategy) {
+		public static <T> Function<GZipIOEntry, IterableCSVBean<T>> parseCSVMapper(MappingStrategy<T> strategy) {
 			return gz -> parseCSV(gz, strategy);
 		}
 
-		public static <I, T> IterableCSVBean<I, T> parseCSV(EntryGZip<I> gz, Class<T> type) throws QuietException {
+		public static <T> IterableCSVBean<T> parseCSV(GZipIOEntry gz, Class<T> type) throws QuietException {
 			return parseCSV(gz, UtilitiesCSV.newHeaderColumnNameMappingStrategy(type));
 		}
 
-		public static <I, T> Function<EntryGZip<I>, IterableCSVBean<I, T>> parseCSVMapper(Class<T> type)
+		public static <T> Function<GZipIOEntry, IterableCSVBean<T>> parseCSVMapper(Class<T> type)
 				throws QuietException {
 			return gz -> parseCSV(gz, type);
 		}
 
-		public static <I, T> IterableCSVBean<I, T> parseCSV(EntryGZip<I> gz, Class<T> type, String... columns)
+		public static <T> IterableCSVBean<T> parseCSV(GZipIOEntry gz, Class<T> type, String... columns)
 				throws QuietException {
 			return parseCSV(gz, UtilitiesCSV.newColumnPositionMappingStrategy(type, columns));
 		}
 
-		public static <I, T> Function<EntryGZip<I>, IterableCSVBean<I, T>> parseCSVMapper(Class<T> type,
-				String... columns) throws QuietException {
+		public static <T> Function<GZipIOEntry, IterableCSVBean<T>> parseCSVMapper(Class<T> type, String... columns)
+				throws QuietException {
 			return gz -> parseCSV(gz, type, columns);
 		}
 
-		public static <I, T> IterableCSVBean<I, T> parseCSV(EntryGZip<I> gz, Class<T> type,
-				Map<String, String> columnMapping) throws QuietException {
+		public static <T> IterableCSVBean<T> parseCSV(GZipIOEntry gz, Class<T> type, Map<String, String> columnMapping)
+				throws QuietException {
 			return parseCSV(gz, UtilitiesCSV.newHeaderColumnNameTranslateMappingStrategy(type, columnMapping));
 		}
 
-		public static <I, T> Function<EntryGZip<I>, IterableCSVBean<I, T>> parseCSVMapper(Class<T> type,
+		public static <T> Function<GZipIOEntry, IterableCSVBean<T>> parseCSVMapper(Class<T> type,
 				Map<String, String> columnMapping) throws QuietException {
 			return gz -> parseCSV(gz, type, columnMapping);
 		}
 
-		public static <I, T> T parseJSON(EntryGZip<I> gz, Class<T> valueType) throws QuietException {
+		public static <T> T parseJSON(GZipIOEntry gz, Class<T> valueType) throws QuietException {
 			return UtilitiesJSON.jsonToClass(gz.getString(), valueType);
 		}
 
-		public static <I, T> Function<EntryGZip<I>, T> parseJSONMapper(Class<T> valueType) throws QuietException {
+		public static <T> Function<GZipIOEntry, T> parseJSONMapper(Class<T> valueType) throws QuietException {
 			return gz -> parseJSON(gz, valueType);
 		}
 
@@ -94,129 +91,113 @@ public class UtilitiesIOMapping {
 		private S3() {
 		}
 
-		public static <I> IterableLines<String> parseLines(EntryS3 entryS3) {
-			return new IterableLines<String>(entryS3.getInfo(), entryS3::getReader);
+		public static IterableLines parseLines(S3IOEntry entryS3) {
+			return new IterableLines(entryS3::getReader);
 		}
 
-		public static <I> IterablePipeCSVString<String> parseCSV(EntryS3 entryS3) throws QuietException {
-			return UtilitiesCSV.newIterableCSVString(entryS3.getInfo(), entryS3::getReader);
+		public static IterablePipeCSV parseCSV(S3IOEntry entryS3) throws QuietException {
+			return UtilitiesCSV.newInstance(entryS3::getReader);
 		}
 
-		public static <T> IterableCSVBean<String, T> parseCSV(EntryS3 entryS3, MappingStrategy<T> strategy)
+		public static <T> IterableCSVBean<T> parseCSV(S3IOEntry entryS3, MappingStrategy<T> strategy)
 				throws QuietException {
-			return UtilitiesCSV.newIterableCSVBean(entryS3.getInfo(), entryS3::getReader, strategy);
+			return UtilitiesCSV.newInstance(entryS3::getReader, strategy);
 		}
 
-		public static <T> Function<EntryS3, IterableCSVBean<String, T>> parseCSVMapper(MappingStrategy<T> strategy) {
+		public static <T> Function<S3IOEntry, IterableCSVBean<T>> parseCSVMapper(MappingStrategy<T> strategy) {
 			return entryS3 -> parseCSV(entryS3, strategy);
 		}
 
-		public static <T> IterableCSVBean<String, T> parseCSV(EntryS3 entryS3, Class<T> type) throws QuietException {
+		public static <T> IterableCSVBean<T> parseCSV(S3IOEntry entryS3, Class<T> type) throws QuietException {
 			return parseCSV(entryS3, UtilitiesCSV.newHeaderColumnNameMappingStrategy(type));
 		}
 
-		public static <T> Function<EntryS3, IterableCSVBean<String, T>> parseCSVMapper(Class<T> type)
-				throws QuietException {
+		public static <T> Function<S3IOEntry, IterableCSVBean<T>> parseCSVMapper(Class<T> type) throws QuietException {
 			return entryS3 -> parseCSV(entryS3, type);
 		}
 
-		public static <T> IterableCSVBean<String, T> parseCSV(EntryS3 entryS3, Class<T> type, String... columns)
+		public static <T> IterableCSVBean<T> parseCSV(S3IOEntry entryS3, Class<T> type, String... columns)
 				throws QuietException {
 			return parseCSV(entryS3, UtilitiesCSV.newColumnPositionMappingStrategy(type, columns));
 		}
 
-		public static <T> Function<EntryS3, IterableCSVBean<String, T>> parseCSVMapper(Class<T> type, String... columns)
+		public static <T> Function<S3IOEntry, IterableCSVBean<T>> parseCSVMapper(Class<T> type, String... columns)
 				throws QuietException {
 			return entryS3 -> parseCSV(entryS3, type, columns);
 		}
 
-		public static <T> IterableCSVBean<String, T> parseCSV(EntryS3 entryS3, Class<T> type,
+		public static <T> IterableCSVBean<T> parseCSV(S3IOEntry entryS3, Class<T> type,
 				Map<String, String> columnMapping) throws QuietException {
 			return parseCSV(entryS3, UtilitiesCSV.newHeaderColumnNameTranslateMappingStrategy(type, columnMapping));
 		}
 
-		public static <T> Function<EntryS3, IterableCSVBean<String, T>> parseCSVMapper(Class<T> type,
+		public static <T> Function<S3IOEntry, IterableCSVBean<T>> parseCSVMapper(Class<T> type,
 				Map<String, String> columnMapping) throws QuietException {
 			return entryS3 -> parseCSV(entryS3, type, columnMapping);
 		}
 
-		public static <T> T parseJSON(EntryS3 entryS3, Class<T> valueType) throws QuietException {
+		public static <T> T parseJSON(S3IOEntry entryS3, Class<T> valueType) throws QuietException {
 			return UtilitiesJSON.jsonToClass(entryS3.getString(), valueType);
 		}
 
-		public static <T> Function<EntryS3, T> parseJSONMapper(Class<T> valueType) throws QuietException {
+		public static <T> Function<S3IOEntry, T> parseJSONMapper(Class<T> valueType) throws QuietException {
 			return entryS3 -> parseJSON(entryS3, valueType);
 		}
 
-		public static EntryGZip<String> parseGZip(EntryS3 entryS3) {
-			return UtilitiesGZip.newEntryGZip(entryS3.getInfo(), entryS3::getContent);
+		public static GZipIOEntry parseGZip(S3IOEntry entryS3) {
+			return UtilitiesGZip.newEntryGZip(entryS3::getContent);
 		}
 
 	}
 
 	public static class CSV {
 
-		public static <I> Function<EntryCSVString<I>, Event<I>> parseEventMapper(String datetimeLabel, String pattern) {
+		public static Function<DataEntry, Event> parseEventMapper(String datetimeLabel, String pattern) {
 			return parseEventMapper(datetimeLabel, UtilitiesTime.unixParser(pattern));
 		}
 
-		public static <I> Function<EntryCSVString<I>, Event<I>> parseEventMapper(String datetimeLabel) {
+		public static Function<DataEntry, Event> parseEventMapper(String datetimeLabel) {
 			return parseEventMapper(datetimeLabel, Long::parseLong);
 		}
 
-		public static <I> Function<EntryCSVString<I>, Event<I>> parseEventMapper(String datetimeLabel,
+		public static Function<DataEntry, Event> parseEventMapper(String datetimeLabel,
 				Function<String, Long> unixtime) {
 			return entry -> parseEvent(entry, datetimeLabel, unixtime);
 		}
 
-		public static <I> Event<I> parseEvent(EntryCSVString<I> entry, String datetimeLabel,
-				Function<String, Long> unixtime) {
-			I metadata = entry.getMetadata();
+		public static Event parseEvent(DataEntry entry, String datetimeLabel, Function<String, Long> unixtime) {
 			String dateTime = entry.getString(datetimeLabel);
-			Unixtime unixtime_ = Unixtime.fromUnix(unixtime.apply(dateTime));
-			Event<I> evt = new Event<I>(metadata, unixtime_);
-			put(entry, evt, datetimeLabel);
+			Instant unixtime_ = Instant.ofEpochMilli(unixtime.apply(dateTime));
+			Event evt = new Event(unixtime_);
+			entry = entry.remove(datetimeLabel);
+			evt.putAll(evt);
 			return evt;
 		}
 
-		public static <I> Function<EntryCSVString<I>, Event<I>> parseEventMapper(String dateLabel, String timeLabel,
-				String pattern) {
+		public static Function<DataEntry, Event> parseEventMapper(String dateLabel, String timeLabel, String pattern) {
 			return parseEventMapper(dateLabel, timeLabel, " ", pattern);
 		}
 
-		public static <I> Function<EntryCSVString<I>, Event<I>> parseEventMapper(String dateLabel, String timeLabel,
-				String separator, String pattern) {
+		public static Function<DataEntry, Event> parseEventMapper(String dateLabel, String timeLabel, String separator,
+				String pattern) {
 			Function<String, Long> parser = UtilitiesTime.unixParser(pattern);
 			return parseEventMapper(dateLabel, timeLabel, (_date, _time) -> parser.apply(_date + separator + _time));
 		}
 
-		public static <I> Function<EntryCSVString<I>, Event<I>> parseEventMapper(String dateLabel, String timeLabel,
+		public static Function<DataEntry, Event> parseEventMapper(String dateLabel, String timeLabel,
 				BiFunction<String, String, Long> unixtime) {
 			return entry -> parseEvent(entry, dateLabel, timeLabel, unixtime);
 		}
 
-		public static <I> Event<I> parseEvent(EntryCSVString<I> entry, String dateLabel, String timeLabel,
+		public static Event parseEvent(DataEntry entry, String dateLabel, String timeLabel,
 				BiFunction<String, String, Long> unixtime) {
-			I metadata = entry.getMetadata();
 			String date = entry.getString(dateLabel);
 			String time = entry.getString(timeLabel);
-			Unixtime unixtime_ = Unixtime.fromUnix(unixtime.apply(date, time));
-			Event<I> evt = new Event<I>(metadata, unixtime_);
-			put(entry, evt, dateLabel, timeLabel);
+			Instant unixtime_ = Instant.ofEpochMilli(unixtime.apply(date, time));
+			Event evt = new Event(unixtime_);
+			entry = entry.remove(dateLabel, timeLabel);
+			evt.putAll(evt);
 			return evt;
-		}
-
-		private static <I> void put(EntryCSVString<I> entry, Event<I> evt, String... remove) {
-			DataEntryImpl values = new DataEntryImpl();
-			for (String label : entry.keys()) {
-				if (!ArrayUtils.contains(remove, label)) {
-					DataValue value = entry.get(label);
-					if (value != null) {
-						values.put(label, value);
-					}
-				}
-			}
-			evt.values(values);
 		}
 
 	}

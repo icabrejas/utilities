@@ -1,15 +1,22 @@
 package org.utilities.core.lang.iterable.batch;
 
 import java.util.function.BiPredicate;
-import java.util.function.Function;
+import java.util.function.Consumer;
 
-import org.utilities.core.lang.UtilitiesNumber;
 import org.utilities.core.lang.iterable.tracker.TrackerImpl;
-import org.utilities.core.util.function.BiPredicatePlus;
 
 public class SemaphoreImpl<T> extends TrackerImpl<T> implements Semaphore<T> {
 
-	private BiPredicate<T, T> store = BiPredicatePlus.dummy();
+	private BiPredicate<T, T> store;
+
+	public SemaphoreImpl(BiPredicate<T, T> store) {
+		this.store = store;
+	}
+
+	@Override
+	public boolean store(T prev, T next) {
+		return store.test(prev, next);
+	}
 
 	@Override
 	public SemaphoreImpl<T> start(Runnable start) {
@@ -18,8 +25,9 @@ public class SemaphoreImpl<T> extends TrackerImpl<T> implements Semaphore<T> {
 	}
 
 	@Override
-	public boolean store(T prev, T next) {
-		return store.test(prev, next);
+	public <R> SemaphoreImpl<T> start(Consumer<R> start, R r) {
+		super.start(start, r);
+		return this;
 	}
 
 	public SemaphoreImpl<T> store(BiPredicate<T, T> store) {
@@ -33,36 +41,10 @@ public class SemaphoreImpl<T> extends TrackerImpl<T> implements Semaphore<T> {
 		return this;
 	}
 
-	public static <T> SemaphoreImpl<T> tuples(int dim) {
-		return new SemaphoreImpl<T>() {
-
-			private Integer counter;
-
-			@Override
-			public void onStart() {
-				counter = 0;
-			}
-
-			@Override
-			public boolean store(T prev, T next) {
-				if (++counter < dim) {
-					return true;
-				} else {
-					counter = 0;
-					return false;
-				}
-			}
-
-		};
-	}
-
-	public static <T> SemaphoreImpl<T> interval(Function<T, Long> time, long window) {
-		return new SemaphoreImpl<T>().store((T prev, T next) -> UtilitiesNumber.floor(time.apply(prev),
-				window) == UtilitiesNumber.floor(time.apply(next), window));
-	}
-
-	public static <T> SemaphoreImpl<T> rollInterval(Function<T, Long> time, long window) {
-		return new SemaphoreImpl<T>().store((T prev, T next) -> time.apply(next) - time.apply(prev) < window);
+	@Override
+	public <R> SemaphoreImpl<T> end(Consumer<R> end, R r) {
+		super.end(end, r);
+		return this;
 	}
 
 }

@@ -7,7 +7,7 @@ import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.utilities.core.lang.exception.QuietException;
-import org.utilities.core.util.concurrent.UtilitiesThread;
+import org.utilities.core.util.concurrent.UtilitiesConcurrent;
 
 public interface SupplierPlus<T> extends Supplier<T> {
 
@@ -62,7 +62,7 @@ public interface SupplierPlus<T> extends Supplier<T> {
 					if (++fails == 3) {
 						throw new QuietException(e);
 					}
-					UtilitiesThread.sleepQuietly(waitTime);
+					UtilitiesConcurrent.sleepQuietly(waitTime);
 				}
 			}
 			return result;

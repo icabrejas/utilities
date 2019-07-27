@@ -10,7 +10,7 @@ import java.util.function.Supplier;
 import org.utilities.core.util.function.SupplierPlus;
 import org.utilities.io.IteratorCloseable;
 import org.utilities.io.csv.bean.IterableCSVBean;
-import org.utilities.io.csv.string.IterablePipeCSVString;
+import org.utilities.io.csv.string.IterablePipeCSV;
 
 import com.opencsv.CSVReader;
 import com.opencsv.bean.ColumnPositionMappingStrategy;
@@ -32,23 +32,22 @@ public class UtilitiesCSV {
 		}
 	}
 
-	public static <I, T> IterableCSVBean<I, T> newIterableCSVBean(I metadata, Supplier<? extends Reader> reader,
-			MappingStrategy<T> strategy) {
-		return new IterableCSVBean<>(metadata, reader, strategy);
+	public static IterablePipeCSV newInstance(Supplier<? extends Reader> reader) {
+		return new IterablePipeCSV(reader);
 	}
 
-	public static <T> IterableCSVBean<File, T> newIterableCSVBean(File file, MappingStrategy<T> strategy) {
+	public static IterablePipeCSV newInstance(File file) {
 		Supplier<? extends Reader> reader = SupplierPlus.parseQuiet(() -> new FileReader(file));
-		return newIterableCSVBean(file, reader, strategy);
+		return newInstance(reader);
 	}
 
-	public static <I> IterablePipeCSVString<I> newIterableCSVString(I metadata, Supplier<? extends Reader> reader) {
-		return new IterablePipeCSVString<>(metadata, reader);
+	public static <T> IterableCSVBean<T> newInstance(Supplier<? extends Reader> reader, MappingStrategy<T> strategy) {
+		return new IterableCSVBean<>(reader, strategy);
 	}
 
-	public static IterablePipeCSVString<File> newIterableCSVString(File file) {
+	public static <T> IterableCSVBean<T> newInstance(File file, MappingStrategy<T> strategy) {
 		Supplier<? extends Reader> reader = SupplierPlus.parseQuiet(() -> new FileReader(file));
-		return newIterableCSVString(file, reader);
+		return newInstance(reader, strategy);
 	}
 
 	public static <T> ColumnPositionMappingStrategy<T> newColumnPositionMappingStrategy(Class<T> type,

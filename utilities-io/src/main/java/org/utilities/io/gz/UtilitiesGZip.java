@@ -50,12 +50,12 @@ public class UtilitiesGZip {
 		}
 	}
 
-	public static EntryGZip<File> newEntryGZip(File file) {
-		return new EntryGZip<>(file, SupplierPlus.parseQuiet(() -> new FileInputStream(file)));
+	public static GZipIOEntry newEntryGZip(File file) {
+		return new GZipIOEntry(SupplierPlus.parseQuiet(() -> new FileInputStream(file)));
 	}
 
-	public static <I> EntryGZip<I> newEntryGZip(I metadata, Supplier<InputStream> inputStream) {
-		return new EntryGZip<>(metadata, inputStream);
+	public static GZipIOEntry newEntryGZip(Supplier<InputStream> inputStream) {
+		return new GZipIOEntry(inputStream);
 	}
 
 	public static GZIPInputStream getInputStream(File file) {

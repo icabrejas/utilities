@@ -1,5 +1,6 @@
 package org.utilities.io;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -66,12 +67,17 @@ public class UtilitiesIO {
 		}
 	}
 
-	public static byte[] toByteArrayQuietly(InputStream inputStream) {
+	public static byte[] toByteArrayQuietly(InputStream inputStream) throws QuietException {
 		try {
 			return IOUtils.toByteArray(inputStream);
 		} catch (IOException e) {
 			throw new QuietException(e);
 		}
+	}
+
+	public static InputStream toByteArrayInputStream(InputStream inputStream) throws QuietException {
+		byte[] buffer = UtilitiesIO.toByteArrayQuietly(inputStream);
+		return new ByteArrayInputStream(buffer);
 	}
 
 	public static <T extends Serializable> T readObjectQuietly(File file, Class<T> type) throws QuietException {

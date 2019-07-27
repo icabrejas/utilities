@@ -17,62 +17,55 @@ import com.opencsv.CSVReader;
 import com.opencsv.bean.IterableCSVToBean;
 import com.opencsv.bean.MappingStrategy;
 
-public class IterableCSVBean<I, T> implements IterablePipe<EntryCSVBean<I, T>> {
+public class IterableCSVBean<T> implements IterablePipe<T> {
 
-	private I metadata;
 	private CSVReaderBuilder reader;
 	private MappingStrategy<T> strategy;
 
-	public IterableCSVBean(I metadata, Supplier<? extends Reader> reader, MappingStrategy<T> strategy) {
-		this.metadata = metadata;
+	public IterableCSVBean(Supplier<? extends Reader> reader, MappingStrategy<T> strategy) {
 		this.reader = new CSVReaderBuilder(reader);
 		this.strategy = strategy;
 	}
 
-	public IterableCSVBean<I, T> metadata(I metadata) {
-		this.metadata = metadata;
-		return this;
-	}
-
-	public IterableCSVBean<I, T> separator(char separator) {
+	public IterableCSVBean<T> separator(char separator) {
 		reader.separator(separator);
 		return this;
 	}
 
-	public IterableCSVBean<I, T> quotechar(char quotechar) {
+	public IterableCSVBean<T> quotechar(char quotechar) {
 		reader.quotechar(quotechar);
 		return this;
 	}
 
-	public IterableCSVBean<I, T> escape(char escape) {
+	public IterableCSVBean<T> escape(char escape) {
 		reader.escape(escape);
 		return this;
 	}
 
-	public IterableCSVBean<I, T> line(int line) {
+	public IterableCSVBean<T> line(int line) {
 		reader.line(line);
 		return this;
 	}
 
-	public IterableCSVBean<I, T> strictQuotes(boolean strictQuotes) {
+	public IterableCSVBean<T> strictQuotes(boolean strictQuotes) {
 		reader.strictQuotes(strictQuotes);
 		return this;
 	}
 
-	public IterableCSVBean<I, T> ignoreLeadingWhiteSpace(boolean ignoreLeadingWhiteSpace) {
+	public IterableCSVBean<T> ignoreLeadingWhiteSpace(boolean ignoreLeadingWhiteSpace) {
 		reader.ignoreLeadingWhiteSpace(ignoreLeadingWhiteSpace);
 		return this;
 	}
 
-	public IterableCSVBean<I, T> keepCR(boolean keepCR) {
+	public IterableCSVBean<T> keepCR(boolean keepCR) {
 		reader.keepCR(keepCR);
 		return this;
 	}
 
 	@Override
-	public IteratorCloseable<EntryCSVBean<I, T>> iterator() {
+	public IteratorCloseable<T> iterator() {
 		try {
-			IterableCSVBean.It<I, T> it = new IterableCSVBean.It<>(metadata, reader, strategy);
+			IterableCSVBean.It<T> it = new IterableCSVBean.It<>(reader, strategy);
 			return new IteratorCloseable<>(it, it);
 		} catch (FileNotFoundException e) {
 			throw new QuietException(e);
@@ -87,15 +80,13 @@ public class IterableCSVBean<I, T> implements IterablePipe<EntryCSVBean<I, T>> {
 		}
 	}
 
-	private static class It<I, T> implements Iterator<EntryCSVBean<I, T>>, Closeable {
+	private static class It<T> implements Iterator<T>, Closeable {
 
-		private I metadata;
 		private IteratorCloseable<T> iteratorCloseable;
 
-		public It(I metadata, Supplier<CSVReader> reader, MappingStrategy<T> strategy) throws FileNotFoundException {
+		public It(Supplier<CSVReader> reader, MappingStrategy<T> strategy) throws FileNotFoundException {
 			CSVReader reader_ = reader.get();
 			IterableCSVToBean<T> it = new IterableCSVToBean<>(reader_, strategy, null);
-			this.metadata = metadata;
 			this.iteratorCloseable = new IteratorCloseable<>(it.iterator(), reader_);
 		}
 
@@ -105,8 +96,8 @@ public class IterableCSVBean<I, T> implements IterablePipe<EntryCSVBean<I, T>> {
 		}
 
 		@Override
-		public EntryCSVBean<I, T> next() {
-			return new EntryCSVBean<>(metadata, iteratorCloseable.next());
+		public T next() {
+			return iteratorCloseable.next();
 		}
 
 		@Override

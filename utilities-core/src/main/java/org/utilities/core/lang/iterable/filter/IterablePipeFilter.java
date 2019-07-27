@@ -35,7 +35,7 @@ public class IterablePipeFilter<T> implements IterablePipe<T> {
 		@Override
 		public boolean hasNext() {
 			while (next == null && it.hasNext()) {
-				if (!filter.emit(next = it.next())) {
+				if (!filter.test(next = it.next())) {
 					next = null;
 				}
 			}

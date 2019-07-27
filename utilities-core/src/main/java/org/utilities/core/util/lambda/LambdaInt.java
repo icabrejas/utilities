@@ -11,7 +11,7 @@ public class LambdaInt extends LambdaValue<Integer> {
 		super(value);
 	}
 
-	public int add(int i) {
+	public int increment(int i) {
 		return set(UtilitiesNumber.sum(get(), i));
 	}
 

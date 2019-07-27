@@ -7,7 +7,6 @@ import org.utilities.core.lang.iterable.IterablePipe;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ListObjectsV2Request;
-import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 
 public class S3Bucket {
@@ -20,16 +19,16 @@ public class S3Bucket {
 		this.bucketName = bucketName;
 	}
 
-	public S3Object get(GetObjectRequest request) {
-		return UtilitiesS3.get(request, s3Client);
+	public S3IOEntry get(GetObjectRequest request, int trials, long waitTime) {
+		return UtilitiesS3.get(request, s3Client, trials, waitTime);
 	}
 
-	public S3Object get(S3ObjectSummary objectSummary) {
-		return UtilitiesS3.get(objectSummary, s3Client);
+	public S3IOEntry get(S3ObjectSummary objectSummary, int trials, long waitTime) {
+		return UtilitiesS3.get(objectSummary, s3Client, trials, waitTime);
 	}
 
-	public S3Object get(String key) {
-		return UtilitiesS3.get(s3Client, bucketName, key);
+	public S3IOEntry get(String key, int trials, long waitTime) {
+		return UtilitiesS3.get(s3Client, bucketName, key, trials, waitTime);
 	}
 
 	public IterableS3 getAll(Supplier<ListObjectsV2Request> request, int trials, long waitTime) {

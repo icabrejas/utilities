@@ -44,19 +44,19 @@ public class JPanelBar extends JPanel {
 
 	private void printBackGround(Graphics g) {
 		if (background != null) {
-			UtilitiesImage.drawImage(this, background, FitMode.CENTER);
+			UtilitiesImage.Graphics.drawImage(g, background, FitMode.CENTER, 0);
 		}
 	}
 
 	private void printLeftImage(Graphics g) {
 		if (left != null) {
-			UtilitiesImage.drawImage(this, left, FitMode.LEFT);
+			UtilitiesImage.Graphics.drawImage(g, left, FitMode.LEFT, 0);
 		}
 	}
 
 	private void printRightImage(Graphics g) {
 		if (right != null) {
-			UtilitiesImage.drawImage(this, right, FitMode.RIGHT);
+			UtilitiesImage.Graphics.drawImage(g, right, FitMode.RIGHT, 0);
 		}
 	}
 }

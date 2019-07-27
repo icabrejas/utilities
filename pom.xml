@@ -37,6 +37,8 @@
 <!--    <module>utilities-twitter</module> -->
     <module>utilities-timeseries</module>
     <module>utilities-symbolicmath</module>
+    <module>dataframe</module>
+    <module>utilities-dafaframe</module>
   </modules>
 	
 </project>

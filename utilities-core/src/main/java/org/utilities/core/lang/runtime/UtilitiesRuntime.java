@@ -1,6 +1,6 @@
 package org.utilities.core.lang.runtime;
 
-import org.utilities.core.util.concurrent.UtilitiesThread;
+import org.utilities.core.util.concurrent.UtilitiesConcurrent;
 
 public class UtilitiesRuntime {
 
@@ -15,7 +15,7 @@ public class UtilitiesRuntime {
 
 	public static void monitoryMemory(long timeoutPeriod) {
 		Memory memory = new Memory();
-		UtilitiesThread.setTimeout(() -> System.out.println(memory), timeoutPeriod);
+		UtilitiesConcurrent.setInterval(() -> System.out.println(memory), timeoutPeriod);
 	}
 
 	public static class Memory {

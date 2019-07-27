@@ -4,10 +4,10 @@ import java.util.Comparator;
 
 import org.utilities.core.lang.iterable.observer.Observer;
 
-public class TimeSeriesValidator<I> implements Observer<Event<I>> {
+public class TimeSeriesValidator implements Observer<Event> {
 
-	private Event<I> prev;
-	private Comparator<Event<I>> timeComparator = Event.timeComparator();
+	private Event prev;
+	private Comparator<Event> timeComparator = Event.timeComparator();
 
 	@Override
 	public void onStart() {
@@ -19,8 +19,8 @@ public class TimeSeriesValidator<I> implements Observer<Event<I>> {
 	}
 
 	@Override
-	public void onNext(Event<I> next) {
-		if (prev != null && (!next.infoEquals(prev) || 0 <= timeComparator.compare(prev, next))) {
+	public void onNext(Event next) {
+		if (prev != null && 0 <= timeComparator.compare(prev, next)) {
 			// FIXME throw specific Exception
 			throw new RuntimeException();
 		}

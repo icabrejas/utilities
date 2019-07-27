@@ -18,7 +18,7 @@ public class UtilitiesIterable {
 	}
 
 	public static <T, U, R> IterablePipe<R> apply(Iterable<T> x, Function<T, R> func) {
-		return IterablePipe.from(x)
+		return IterablePipe.newInstance(x)
 				.map(func);
 	}
 

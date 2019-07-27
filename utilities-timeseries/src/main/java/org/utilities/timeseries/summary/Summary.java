@@ -1,97 +1,75 @@
 package org.utilities.timeseries.summary;
 
 import java.security.InvalidParameterException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-import org.utilities.core.dataframe.entry.DataEntry;
-import org.utilities.core.dataframe.entry.DataEntryImpl;
-import org.utilities.core.dataframe.entry.value.DataValue;
 import org.utilities.core.lang.iterable.IterablePipe;
-import org.utilities.core.time.Unixtime;
 import org.utilities.core.util.function.BiFunctionPlus;
 import org.utilities.core.util.map.NotNullMap;
+import org.utilities.dataframe.dataentry.DataEntry;
+import org.utilities.dataframe.dataentry.DataEntryImpl;
+import org.utilities.dataframe.datavalue.DataValue;
 import org.utilities.timeseries.Event;
 
-public interface Summary<I> extends Function<List<Event<I>>, Event<I>> {
+public interface Summary<I> extends Function<List<Event>, Event> {
 
 	public static class ByColumn<I> implements Summary<I> {
 
-		private Function<Iterable<I>, I> metainfo;
-		private Function<Iterable<Unixtime>, Unixtime> unixtime;
+		private Function<Iterable<Instant>, Instant> instant;
 		private Function<Iterable<DataValue>, DataValue> summary;
 
-		public ByColumn(Function<Iterable<I>, I> metainfo, Function<Iterable<Unixtime>, Unixtime> unixtime,
+		public ByColumn(Function<Iterable<Instant>, Instant> unixtime,
 				Function<Iterable<DataValue>, DataValue> summary) {
-			this.metainfo = metainfo;
-			this.unixtime = unixtime;
+			this.instant = unixtime;
 			this.summary = summary;
 		}
 
 		public ByColumn(long window, Function<Iterable<DataValue>, DataValue> summary) {
-			this.metainfo = Summary.ByColumn::metainfo;
-			this.unixtime = BiFunctionPlus.parseFunction(Summary.ByColumn::unixtime, window);
+			this.instant = BiFunctionPlus.parseFunction(Summary.ByColumn::unixtime, window);
 			this.summary = summary;
 		}
 
-		private static <I> I metainfo(Iterable<I> infos) {
-			I commonInfo = null;
-			for (I info : infos) {
-				if (commonInfo == null) {
-					commonInfo = info;
-				} else if (!commonInfo.equals(info)) {
-					throw new InvalidParameterException();
-				}
-			}
-			return commonInfo;
-		}
-
-		private static Unixtime unixtime(Iterable<Unixtime> times, long window) {
-			Unixtime unixtime = null;
-			for (Unixtime time : times) {
+		private static Instant unixtime(Iterable<Instant> times, long window) {
+			Instant unixtime = null;
+			for (Instant time : times) {
 				long end = intervalEnd(window, time);
 				if (unixtime == null) {
-					unixtime = new Unixtime(end);
-				} else if (end != unixtime.getTimeInMillis()) {
+					unixtime = Instant.ofEpochMilli(end);
+				} else if (end != unixtime.toEpochMilli()) {
 					throw new InvalidParameterException();
 				}
 			}
 			return unixtime;
 		}
 
-		private static long intervalEnd(long window, Unixtime time) {
-			long start = time.getTimeInMillis() - time.getTimeInMillis() % window;
-			if (start == time.getTimeInMillis()) {
+		private static long intervalEnd(long window, Instant time) {
+			long start = time.toEpochMilli() - time.toEpochMilli() % window;
+			if (start == time.toEpochMilli()) {
 				start -= window;
 			}
 			return start + window;
 		}
 
 		@Override
-		public Event<I> apply(List<Event<I>> events) {
-			I metainfo = metainfo(events);
-			Unixtime unixtime = unixtime(events);
-			Event<I> summary = new Event<>(metainfo, unixtime);
-			summary.values(summarize(events));
+		public Event apply(List<Event> events) {
+			Instant unixtime = unixtime(events);
+			Event summary = new Event(unixtime);
+			summary.putAll(summarize(events));
 			return summary;
 		}
 
-		private I metainfo(List<Event<I>> events) {
-			return IterablePipe.from(events)
-					.map(Event::getMetainfo)
-					.apply(this.metainfo);
+		private Instant unixtime(List<Event> events) {
+			return IterablePipe.newInstance(events)
+					.map(Event::getTime)
+					.apply(this.instant);
 		}
 
-		private Unixtime unixtime(List<Event<I>> events) {
-			return IterablePipe.from(events)
-					.map(Event::getUnixtime)
-					.apply(this.unixtime);
-		}
-
-		private DataEntry summarize(Iterable<Event<I>> events) {
+		private DataEntry summarize(Iterable<Event> events) {
 			NotNullMap<String, List<DataValue>> rawValues = new NotNullMap<>(ArrayList::new);
-			for (Event<I> evt : events) {
+			for (Event evt : events) {
 				for (String name : evt.keys()) {
 					DataValue value = evt.get(name);
 					rawValues.get(name)

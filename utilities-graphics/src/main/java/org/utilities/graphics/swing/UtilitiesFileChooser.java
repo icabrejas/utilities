@@ -15,7 +15,8 @@ import org.utilities.graphics.awt.UtilitiesImage;
 public class UtilitiesFileChooser {
 
 	public static <T> T showOpenDialog(Function<File, T> mapper, String defaultPath, String... fileExtensions) {
-		return FunctionPlus.applyIfNotNull(showOpenDialog(defaultPath, fileExtensions), mapper);
+		File file = UtilitiesFileChooser.showOpenDialog(defaultPath, fileExtensions);
+		return FunctionPlus.applyIfNotNull(file, mapper);
 	}
 
 	public static File showOpenDialog(String defaultPath, String... fileExtensions) {
@@ -66,18 +67,18 @@ public class UtilitiesFileChooser {
 		private static final String[] EXTENSIONS = new String[] { "jpg", "jpeg", "png", "gif" };
 
 		public static BufferedImage load() throws QuietException {
-			return showOpenDialog(UtilitiesImage::readQuietly, null, EXTENSIONS);
+			return showOpenDialog(UtilitiesImage.IO::readQuietly, null, EXTENSIONS);
 		}
 
 		public static IterablePipe<BufferedImage> loadAll() throws QuietException {
-			return showOpenMultipleDialog(UtilitiesImage::readQuietly, null, EXTENSIONS);
+			return showOpenMultipleDialog(UtilitiesImage.IO::readQuietly, null, EXTENSIONS);
 		}
 
 		public static void save(BufferedImage image) {
 			JFileChooser chooser = new JFileChooser();
 			if (chooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
 				File output = chooser.getSelectedFile();
-				UtilitiesImage.writeQuietly(image, output);
+				UtilitiesImage.IO.writeQuietly(image, output);
 			}
 
 		}

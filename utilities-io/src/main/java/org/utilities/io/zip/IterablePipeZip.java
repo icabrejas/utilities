@@ -12,18 +12,12 @@ import org.utilities.core.lang.exception.QuietException;
 import org.utilities.core.lang.iterable.IterablePipe;
 import org.utilities.io.IteratorCloseable;
 
-public class IterablePipeZip<I> implements IterablePipe<EntryZip<I>> {
+public class IterablePipeZip implements IterablePipe<ZipIOEntry> {
 
-	private I info;
 	private Supplier<InputStream> inputStream;
 
-	public IterablePipeZip(I info, Supplier<InputStream> inputStream) {
-		this.info = info;
+	public IterablePipeZip(Supplier<InputStream> inputStream) {
 		this.inputStream = inputStream;
-	}
-
-	public I getInfo() {
-		return info;
 	}
 
 	public ZipInputStream getInputStream() {
@@ -31,21 +25,19 @@ public class IterablePipeZip<I> implements IterablePipe<EntryZip<I>> {
 	}
 
 	@Override
-	public Iterator<EntryZip<I>> iterator() {
+	public Iterator<ZipIOEntry> iterator() {
 		ZipInputStream zipInputStream = getInputStream();
-		It<I> it = new It<>(this);
+		It it = new It(zipInputStream);
 		return new IteratorCloseable<>(it, zipInputStream);
 	}
 
-	private static class It<I> implements Iterator<EntryZip<I>> {
+	private static class It implements Iterator<ZipIOEntry> {
 
 		private ZipEntry next;
 		private ZipInputStream zipInputStream;
-		private IterablePipeZip<I> it;
 
-		public It(IterablePipeZip<I> it) {
-			this.it = it;
-			this.zipInputStream = it.getInputStream();
+		public It(ZipInputStream zipInputStream) {
+			this.zipInputStream = zipInputStream;
 			next = getNextEntry(zipInputStream);
 		}
 
@@ -55,11 +47,11 @@ public class IterablePipeZip<I> implements IterablePipe<EntryZip<I>> {
 		}
 
 		@Override
-		public EntryZip<I> next() {
+		public ZipIOEntry next() {
 			if (!hasNext()) {
 				throw new NoSuchElementException();
 			}
-			EntryZip<I> current = new EntryZip<>(next, it.getInfo(), zipInputStream);
+			ZipIOEntry current = new ZipIOEntry(next, zipInputStream);
 			next = getNextEntry(zipInputStream);
 			return current;
 		}

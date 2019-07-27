@@ -17,6 +17,10 @@ public interface ConsumerPlus<T> extends Consumer<T> {
 		return consumer::accept;
 	}
 
+	public static <T> RunnablePlus parseRunnable(Consumer<T> consumer, T t) {
+		return () -> consumer.accept(t);
+	}
+
 	public static <T> FunctionPlus<T, T> parseFunction(Consumer<T> consumer) {
 		return t -> {
 			consumer.accept(t);

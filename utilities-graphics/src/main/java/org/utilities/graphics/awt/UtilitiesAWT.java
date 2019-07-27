@@ -1,6 +1,8 @@
 package org.utilities.graphics.awt;
 
 import java.awt.AWTException;
+import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics2D;
@@ -24,6 +26,8 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import javax.swing.JComponent;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
 import javax.swing.event.ListSelectionEvent;
 
 import org.utilities.core.lang.exception.QuietException;
@@ -213,6 +217,23 @@ public class UtilitiesAWT {
 		g.drawImage(backgound, 0, 0, component.getWidth(), component.getHeight(), component);
 		component.paint(bufferedImage.createGraphics());
 		return bufferedImage;
+	}
+
+	public static JFrame newJFrame() {
+		JFrame frame = new JFrame();
+		frame.setLayout(new BorderLayout());
+		frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setLocationRelativeTo(null);
+		return frame;
+	}
+
+	public static JPanel addBody(JFrame frame) {
+		JPanel body = new JPanel();
+		body.setLayout(new BorderLayout());
+		body.setBackground(Color.BLACK);
+		frame.add(body, BorderLayout.CENTER);
+		return body;
 	}
 
 }

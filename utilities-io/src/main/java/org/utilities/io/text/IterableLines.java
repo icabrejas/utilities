@@ -13,46 +13,38 @@ import org.utilities.core.lang.iterable.IterablePipe;
 import org.utilities.core.util.function.SupplierPlus;
 import org.utilities.io.IteratorCloseable;
 
-public class IterableLines<I> implements IterablePipe<EntryLine<I>> {
+public class IterableLines implements IterablePipe<String> {
 
-	private I metadata;
 	private Supplier<? extends Reader> reader;
 
-	public IterableLines(I metadata, Supplier<? extends Reader> reader) {
-		this.metadata = metadata;
+	public IterableLines(Supplier<? extends Reader> reader) {
 		this.reader = reader;
 	}
 
-	public static <I> IterableLines<I> newInstance(I metadata, Supplier<? extends Reader> reader) {
-		return new IterableLines<>(metadata, reader);
+	public static IterableLines newInstance(Supplier<? extends Reader> reader) {
+		return new IterableLines(reader);
 	}
 
-	public static IterableLines<File> newInstance(String pathname) {
+	public static IterableLines newInstance(String pathname) {
 		return IterableLines.newInstance(new File(pathname));
 	}
 
-	public static IterableLines<File> newInstance(File file) {
+	public static IterableLines newInstance(File file) {
 		Supplier<? extends Reader> reader = SupplierPlus.parseQuiet(() -> new FileReader(file));
-		return new IterableLines<>(file, reader);
-	}
-
-	public I getMetadata() {
-		return metadata;
+		return new IterableLines(reader);
 	}
 
 	@Override
-	public IteratorCloseable<EntryLine<I>> iterator() {
-		It<I> it = new It<>(metadata, new LineIterator(reader.get()));
+	public IteratorCloseable<String> iterator() {
+		It it = new It(new LineIterator(reader.get()));
 		return new IteratorCloseable<>(it, it);
 	}
 
-	private static class It<I> implements Iterator<EntryLine<I>>, Closeable {
+	private static class It implements Iterator<String>, Closeable {
 
-		private I metadata;
 		private LineIterator it;
 
-		public It(I metadata, LineIterator it) {
-			this.metadata = metadata;
+		public It(LineIterator it) {
 			this.it = it;
 		}
 
@@ -67,8 +59,8 @@ public class IterableLines<I> implements IterablePipe<EntryLine<I>> {
 		}
 
 		@Override
-		public EntryLine<I> next() {
-			return new EntryLine<>(metadata, it.next());
+		public String next() {
+			return it.next();
 		}
 
 	}

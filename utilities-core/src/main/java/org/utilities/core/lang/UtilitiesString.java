@@ -11,13 +11,13 @@ public class UtilitiesString {
 	}
 
 	public static List<String> paste(Object a, Iterable<?> b, String sep) {
-		return IterablePipe.from(b)
+		return IterablePipe.newInstance(b)
 				.map(b_ -> a + sep + b_)
 				.toList();
 	}
 
 	public static List<String> paste(Iterable<?> a, Object b, String sep) {
-		return IterablePipe.from(a)
+		return IterablePipe.newInstance(a)
 				.map(a_ -> a_ + sep + b)
 				.toList();
 	}

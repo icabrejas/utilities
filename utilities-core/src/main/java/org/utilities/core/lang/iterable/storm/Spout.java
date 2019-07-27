@@ -4,7 +4,7 @@ import java.util.Iterator;
 import java.util.function.Supplier;
 
 import org.utilities.core.lang.iterable.IterablePipe;
-import org.utilities.core.util.concurrent.UtilitiesThread;
+import org.utilities.core.util.concurrent.UtilitiesConcurrent;
 
 public class Spout<T> implements IterablePipe<T> {
 
@@ -40,7 +40,7 @@ public class Spout<T> implements IterablePipe<T> {
 		public boolean hasNext() {
 			while (next == null) {
 				next = spout.get();
-				UtilitiesThread.sleepQuietly(millis);
+				UtilitiesConcurrent.sleepQuietly(millis);
 			}
 			return true;
 		}

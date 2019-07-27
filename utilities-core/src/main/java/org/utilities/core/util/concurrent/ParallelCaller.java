@@ -12,7 +12,7 @@ import org.utilities.core.lang.exception.QuietException;
 
 public class ParallelCaller<T> implements Iterable<T> {
 
-	private ExecutorService pool = UtilitiesThread.newThreadPool();
+	private ExecutorService pool = UtilitiesConcurrent.newThreadPool();
 	private List<Future<T>> results = new ArrayList<>();
 
 	public static <T> ParallelCaller<T> from() {
@@ -41,13 +41,13 @@ public class ParallelCaller<T> implements Iterable<T> {
 			pool.shutdown();
 		}
 		if (wait) {
-			UtilitiesThread.wait(pool);
+			UtilitiesConcurrent.waitQuietly(pool);
 		}
 	}
 
 	public List<T> get() throws QuietException {
 		shutdown(true);
-		return UtilitiesThread.get(results);
+		return UtilitiesConcurrent.get(results);
 	}
 
 	@Override

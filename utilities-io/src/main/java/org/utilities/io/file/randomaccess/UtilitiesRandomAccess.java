@@ -15,7 +15,6 @@ public class UtilitiesRandomAccess {
 			file.read(bytes);
 			return bytes;
 		}
-
 	}
 
 	public static void write(String filePath, int seek, byte[] bytes) throws IOException {

@@ -11,7 +11,7 @@ import com.amazonaws.services.s3.model.ListObjectsV2Request;
 import com.amazonaws.services.s3.model.ListObjectsV2Result;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 
-public class IterableS3 implements IterablePipe<EntryS3> {
+public class IterableS3 implements IterablePipe<S3IOEntry> {
 
 	private AmazonS3 s3Client;
 	private Supplier<ListObjectsV2Request> request;
@@ -26,11 +26,11 @@ public class IterableS3 implements IterablePipe<EntryS3> {
 	}
 
 	@Override
-	public Iterator<EntryS3> iterator() {
+	public Iterator<S3IOEntry> iterator() {
 		return new It(s3Client, request.get(), trials, waitTime);
 	}
 
-	private static class It implements Iterator<EntryS3> {
+	private static class It implements Iterator<S3IOEntry> {
 
 		private AmazonS3 s3Client;
 		private ListObjectsV2Request request;
@@ -63,11 +63,11 @@ public class IterableS3 implements IterablePipe<EntryS3> {
 		}
 
 		@Override
-		public EntryS3 next() {
+		public S3IOEntry next() {
 			if (!hasNext()) {
 				throw new NoSuchElementException();
 			}
-			return EntryS3.newInstance(s3Client, pageContent.next(), trials, waitTime);
+			return S3IOEntry.newInstance(s3Client, pageContent.next(), trials, waitTime);
 		}
 
 	}

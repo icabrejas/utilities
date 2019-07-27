@@ -7,10 +7,12 @@ import java.util.NoSuchElementException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.utilities.core.lang.exception.QuietException;
 import org.utilities.core.lang.iterable.IterablePipe;
 import org.utilities.core.lang.iterable.tracker.IterablePipeTracked;
-import org.utilities.core.util.concurrent.UtilitiesThread;
+import org.utilities.core.util.concurrent.UtilitiesConcurrent;
 
 public class IterablePipeParallelMap<T, R> implements IterablePipe<R> {
 
@@ -29,37 +31,36 @@ public class IterablePipeParallelMap<T, R> implements IterablePipe<R> {
 		return new It<>(it.iterator(), mapper, nThreads);
 	}
 
-	// public static <T, R> List<R> parallelMap(List<T> it, Function<T, R>
-	// mapper) {
-	// ParallelCaller<R> caller = new ParallelCaller<>();
-	// for (T t : it) {
-	// caller.submit(() -> mapper.apply(t));
-	// }
-	// return caller.get();
-	// }
-
 	private static class It<T, R> implements Iterator<R> {
+
+		private static Logger LOGGER = LoggerFactory.getLogger(IterablePipeParallelMap.It.class);
 
 		private Iterator<T> it;
 		private Mapper<T, R> mapper;
-		private int nThreads;
+		private int queueSize;
 		private ExecutorService pool;
-		private List<Future<R>> tasks = new ArrayList<>();
+		private List<Future<R>> queue = new ArrayList<>();
 
-		public It(Iterator<T> it, Mapper<T, R> mapper, int nThreads) {
+		public It(Iterator<T> it, Mapper<T, R> mapper, int size) {
+			this(it, mapper, size, size);
+		}
+
+		public It(Iterator<T> it, Mapper<T, R> mapper, int poolSize, int queueSize) {
 			this.it = it;
 			this.mapper = mapper;
-			this.nThreads = nThreads;
-			this.pool = UtilitiesThread.newThreadPool(nThreads);
+			this.queueSize = queueSize;
+			this.pool = UtilitiesConcurrent.newThreadPool(poolSize);
 		}
 
 		@Override
 		public boolean hasNext() {
 			fill();
-			if (!tasks.isEmpty()) {
+			if (!queue.isEmpty()) {
 				return true;
 			} else {
-				pool.shutdown();
+				if (!pool.isShutdown()) {
+					pool.shutdown();
+				}
 				return false;
 			}
 		}
@@ -71,7 +72,8 @@ public class IterablePipeParallelMap<T, R> implements IterablePipe<R> {
 			}
 			try {
 				waitToNext();
-				Future<R> task = tasks.remove(0);
+				Future<R> task = queue.remove(0);
+				LOGGER.info(task.toString());
 				return task.get();
 			} catch (Exception e) {
 				throw new QuietException(e);
@@ -79,29 +81,15 @@ public class IterablePipeParallelMap<T, R> implements IterablePipe<R> {
 		}
 
 		private void waitToNext() {
-			Future<R> task = tasks.get(0);
-			while (!task.isDone()) {
-				fill();
-				UtilitiesThread.sleepQuietly(UtilitiesThread.DEFAULT_SLEEP_MILLIS);
-			}
+			UtilitiesConcurrent.waitQuietly(queue.get(0)::isDone);
 		}
 
 		private void fill() {
-			while (it.hasNext() && notFinishedTasks() < nThreads) {
+			while (it.hasNext() && queue.size() < queueSize) {
 				T t = it.next();
-				Future<R> task = pool.submit(() -> mapper.map(t));
-				tasks.add(task);
+				Future<R> task = UtilitiesConcurrent.submitAndTrack(pool, () -> mapper.map(t));
+				queue.add(task);
 			}
-		}
-
-		private int notFinishedTasks() {
-			int notFinishedTasks = 0;
-			for (Future<R> task : tasks) {
-				if (!task.isDone()) {
-					notFinishedTasks++;
-				}
-			}
-			return notFinishedTasks;
 		}
 
 	}
