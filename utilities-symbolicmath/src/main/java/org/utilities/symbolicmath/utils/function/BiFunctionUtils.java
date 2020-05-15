@@ -6,10 +6,10 @@ import java.util.function.BiFunction;
 public class BiFunctionUtils {
 
 	public static <T, U, R> BiFunction<T, U, R> notNullEval(BiFunction<T, U, R> func) {
-		return (t, u) -> t != null && u != null ? func.apply(t, u) : null;
+		return (t, u) -> t == null || u == null ? null : func.apply(t, u);
 	}
 
 	public static <T, U, R> BiFunction<Optional<T>, Optional<U>, R> optionalEval(BiFunction<T, U, R> func) {
-		return (t, u) -> t.isPresent() && u.isPresent() ? func.apply(t.get(), u.get()) : null;
+		return (t, u) -> !t.isPresent() || !u.isPresent() ? null : func.apply(t.get(), u.get());
 	}
 }

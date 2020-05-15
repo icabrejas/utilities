@@ -4,8 +4,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 
+import org.utilities.core.UtilitiesConcurrent;
 import org.utilities.core.util.concurrent.Interval;
-import org.utilities.core.util.concurrent.UtilitiesConcurrent;
 
 public class Queue<M> {
 

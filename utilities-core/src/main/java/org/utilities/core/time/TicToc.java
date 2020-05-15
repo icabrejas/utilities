@@ -1,8 +1,14 @@
 package org.utilities.core.time;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.utilities.core.UtilitiesTime;
+
 public class TicToc {
 
 	public static final String DEFAULT_PATTERN = "HH:mm:ss.SSS";
+
+	private static Logger LOGGER = LoggerFactory.getLogger(TicToc.class);
 
 	private String pattern;
 	private long tic;
@@ -18,7 +24,12 @@ public class TicToc {
 	}
 
 	public TicToc toc() {
-		System.out.println(UtilitiesTime.formatMillis(System.currentTimeMillis() - tic, pattern));
+		LOGGER.info(UtilitiesTime.formatMillis(System.currentTimeMillis() - tic, pattern));
+		return tic();
+	}
+
+	public TicToc toc(String message) {
+		LOGGER.info(message + UtilitiesTime.formatMillis(System.currentTimeMillis() - tic, pattern));
 		return tic();
 	}
 

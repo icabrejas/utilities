@@ -8,7 +8,7 @@ public class TrackedCallable<V> implements Callable<V> {
 	private Long callTime;
 	private Long doneTime;
 
-	protected TrackedCallable(Callable<V> callable) {
+	public TrackedCallable(Callable<V> callable) {
 		this.callable = callable;
 	}
 

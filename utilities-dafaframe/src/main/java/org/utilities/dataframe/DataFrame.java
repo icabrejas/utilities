@@ -1,190 +1,164 @@
 package org.utilities.dataframe;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
-import java.util.function.BiPredicate;
-import java.util.function.Consumer;
+import java.util.Map;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import org.utilities.core.lang.iterable.IterablePipe;
-import org.utilities.core.lang.iterable.filter.Filter;
-import org.utilities.core.lang.iterable.limit.StopCriteriaImpl;
-import org.utilities.core.lang.iterable.observer.Observer;
-import org.utilities.dataframe.dataentry.DataEntry;
-import org.utilities.dataframe.datavalue.DataValue;
-import org.utilities.dataframe.filter.DataValueFilter;
-import org.utilities.dataframe.mutate.Mutation;
-import org.utilities.dataframe.rename.RenameImpl;
-import org.utilities.dataframe.select.Selection;
+import org.utilities.core.lang.iterable.batch.IPBatchSemaphore;
+import org.utilities.core.lang.iterable.braid.IPBraided;
+import org.utilities.core.lang.iterable.limit.IPLimitedStopCriteria;
+import org.utilities.core.lang.iterable.track.IPTracked;
+import org.utilities.dataframe.bind.DFBindRows;
+import org.utilities.dataframe.bind.DFRowBinded;
+import org.utilities.dataframe.cell.DFCell;
+import org.utilities.dataframe.column.DFColumn;
+import org.utilities.dataframe.row.DFRow;
+import org.utilities.dataframe.row.DFRowImpl;
+import org.utilities.dataframe.symbol.DFStore;
+import org.utilities.dataframe.symbol.DFSymbolUtils;
+import org.utilities.symbolicmath.store.SymbolStore;
+import org.utilities.symbolicmath.symbol.Symbol;
+import org.utilities.symbolicmath.symbol.SymbolBoolean;
+import org.utilities.symbolicmath.symbol.SymbolDouble;
+import org.utilities.symbolicmath.symbol.SymbolInstant;
 
-public interface DataFrame extends IterablePipe<DataEntry> {
+public interface DataFrame extends IterablePipe<DFRow> {
 
-	public static DataFrame newInstance(Iterable<DataEntry> entries) {
-		return entries::iterator;
+	default SymbolStore<DFCell> store() {
+		return new DFStore();
 	}
 
-	// TODO
-	// default BasicDataFrame bindColumns(String
-	// prefixA, Iterable<DataEntry> entryB, String prefixB) {
-	// Comparator<Map.Entry<Integer, E>> selector = Funnel.sequential(2);
-	// List<Iterable<DataEntry>> sources = Arrays.asList(this, entryB);
-	// new IterablePipeWoven<>(selector, sources);
-	// return null;
-	// }
+	public static DataFrame as(Iterable<DFRow> rows) {
+		DFStore store = new DFStore();
+		return new DataFrameImpl(new IPTracked<>(rows, store), store);
+	}
 
-	// TODO add other version with Selection
+	public static DataFrame as(DFColumn column, String name) {
+		return DataFrame.as(column.map(cell -> new DFRowImpl(name, cell)));
+	}
+
+	// TODO it's necessary
+	default Stream<DFRow> stream(int characteristics, boolean parallel) {
+		Spliterator<DFRow> spliterator = Spliterators.spliteratorUnknownSize(iterator(), characteristics);
+		return StreamSupport.stream(spliterator, parallel);
+	}
+
+	default DataFrame put(String name, DFColumn column) {
+		// FIXME null prefixes
+		return remove(name).bindColumns(null, DataFrame.as(column, name), null);
+	}
+
+	default DataFrame bindRows(DataFrame other) {
+		return new DFBindRows(this, other);
+	}
+
+	default DataFrame bindColumns(String thisPrefix, DataFrame other, String otherPrefix) {
+		return bindColumns(Arrays.asList(thisPrefix, otherPrefix), Arrays.asList(this, other));
+	}
+
+	public static DataFrame bindColumns(List<String> prefixes, List<DataFrame> dataFrames) {
+		return IPBraided.create(dataFrames)
+				.batch(IPBatchSemaphore.tuples(dataFrames.size()))
+				.map(tuple -> (DFRow) new DFRowBinded(prefixes, tuple))
+				.apply(DataFrame::as);
+	}
+
 	default DataFrame gather(String key, String value, String... names) {
-		return newInstance(flatMap(entry -> entry.gather(key, value, names)));
+		return as(flatMap(entry -> entry.gather(key, value, names)));
 	}
 
 	default DataFrame gather(String key, String value, Collection<String> names) {
-		return newInstance(flatMap(entry -> entry.gather(key, value, names)));
+		return as(flatMap(entry -> entry.gather(key, value, names)));
 	}
 
-	default DataFrame mutate(Mutation mutation) {
-		return newInstance(map(DataEntry::mutate, mutation));
+	// ---------------------- spread ----------------------------------------
+
+	default DataFrame mutate(String name, Symbol<SymbolStore<DFCell>, DFCell> symbol, SymbolStore<DFCell> store) {
+		return as(map(DFSymbolUtils.asMapper(name, symbol, store, true)));
 	}
 
-	default DataFrame mutate(String name, Function<DataEntry, DataValue> mutation) {
-		return newInstance(map(entry -> entry.mutate(name, mutation)));
+	default DataFrame mutate(String name, Symbol<SymbolStore<DFCell>, DFCell> symbol) {
+		return mutate(name, symbol, store());
 	}
 
-	default <U> DataFrame mutate(String name, BiFunction<DataEntry, U, DataValue> mutation, U u) {
-		return newInstance(map(entry -> entry.mutate(name, mutation, u)));
+	default DataFrame mutate(String name, SymbolDouble<SymbolStore<DFCell>> symbol, SymbolStore<DFCell> store) {
+		return as(map(DFSymbolUtils.asMapper(name, symbol, store, true)));
 	}
 
-	default DataFrame remove(Selection selection) {
-		return newInstance(map(DataEntry::remove, selection));
+	default DataFrame mutate(String name, SymbolDouble<SymbolStore<DFCell>> symbol) {
+		return mutate(name, symbol, store());
 	}
 
-	default DataFrame remove(Collection<String> names) {
-		return newInstance(map(DataEntry::remove, names));
+	default DataFrame mutate(String name, SymbolBoolean<SymbolStore<DFCell>> symbol, SymbolStore<DFCell> store) {
+		return as(map(DFSymbolUtils.asMapper(name, symbol, store, true)));
 	}
 
-	default DataFrame remove(String... names) {
-		return newInstance(map(DataEntry::remove, names));
+	default DataFrame mutate(String name, SymbolBoolean<SymbolStore<DFCell>> symbol) {
+		return mutate(name, symbol, store());
 	}
 
-	default DataFrame rename(RenameImpl rename) {
-		return newInstance(map(DataEntry::rename, rename));
+	default DataFrame mutate(String name, SymbolInstant<SymbolStore<DFCell>> symbol, SymbolStore<DFCell> store) {
+		return as(map(DFSymbolUtils.asMapper(name, symbol, store, true)));
 	}
 
-	default DataFrame rename(String newName, String oldName) {
-		return newInstance(map(entry -> entry.rename(newName, oldName)));
+	default DataFrame mutate(String name, SymbolInstant<SymbolStore<DFCell>> symbol) {
+		return mutate(name, symbol, store());
 	}
 
-	default DataFrame select(Selection selection) {
-		return newInstance(map(DataEntry::select, selection));
+	default DataFrame select(Predicate<String> selection) {
+		return as(map(DFRow::select, selection));
 	}
 
 	default DataFrame select(Collection<String> names) {
-		return newInstance(map(DataEntry::select, names));
+		return as(map(DFRow::select, names));
 	}
 
 	default DataFrame select(String... names) {
-		return newInstance(map(DataEntry::select, names));
+		return as(map(DFRow::select, names));
 	}
 
-	default DataFrame separate(String key, String separator, List<String> names) {
-		return newInstance(map(entry -> entry.separate(key, separator, names)));
+	default DataFrame remove(Predicate<String> selection) {
+		return as(map(DFRow::remove, selection));
 	}
 
-	@Override
-	default DataFrame observe(Observer<DataEntry> observer) {
-		return newInstance(IterablePipe.super.observe(observer));
+	default DataFrame remove(Collection<String> names) {
+		return as(map(DFRow::remove, names));
 	}
 
-	@Override
-	default DataFrame observe(Consumer<DataEntry> observer) {
-		return newInstance(IterablePipe.super.observe(observer));
+	default DataFrame remove(String... names) {
+		return as(map(DFRow::remove, names));
 	}
 
-	@Override
-	default <U> DataFrame observe(BiConsumer<DataEntry, U> observer, U u) {
-		return newInstance(IterablePipe.super.observe(observer, u));
+	default DataFrame rename(Function<String, String> translator) {
+		return as(map(DFRow::rename, translator));
 	}
 
-	default DataFrame filterIsNull(String name) {
-		return filter(DataValueFilter.isNull(name));
+	default DataFrame rename(Map<String, String> translations) {
+		return as(map(DFRow::rename, translations));
 	}
 
-	default DataFrame filterIsNotNull(String name) {
-		return filter(DataValueFilter.isNotNull(name));
+	default DataFrame rename(String oldName, String newName) {
+		return as(map(entry -> entry.rename(oldName, newName)));
 	}
 
-	default DataFrame filterIsEquals(String name, DataValue value) {
-		return filter(DataValueFilter.isEquals(name, value));
+	default DataFrame head() {
+		return head(6);
 	}
 
-	default DataFrame filterIsNotEquals(String name, DataValue value) {
-		return filter(DataValueFilter.isNotEquals(name, value));
+	default DataFrame head(int lines) {
+		return as(limit(IPLimitedStopCriteria.limit(lines)));
 	}
 
-	default DataFrame filterIsHigher(String name, DataValue value) {
-		return filter(DataValueFilter.isHigher(name, value));
-	}
-
-	default DataFrame filterIsHigherOrEquals(String name, DataValue value) {
-		return filter(DataValueFilter.isHigherOrEquals(name, value));
-	}
-
-	default DataFrame filterIsLower(String name, DataValue value) {
-		return filter(DataValueFilter.isLower(name, value));
-	}
-
-	default DataFrame filterIsLowerOrEquals(String name, DataValue value) {
-		return filter(DataValueFilter.isLowerOrEquals(name, value));
-	}
-
-	default DataFrame filterIsBetween(String name, DataValue min, DataValue max) {
-		return filter(DataValueFilter.isBetween(name, min, max));
-	}
-
-	default DataFrame filterIsBetweenOrEquals(String name, DataValue min, DataValue max) {
-		return filter(DataValueFilter.isBetweenOrEquals(name, min, max));
-	}
-
-	@Override
-	default DataFrame filter(Filter<DataEntry> filter) {
-		return newInstance(IterablePipe.super.filter(filter));
-	}
-
-	@Override
-	default DataFrame filter(Predicate<DataEntry> filter) {
-		return newInstance(IterablePipe.super.filter(filter));
-	}
-
-	@Override
-	default <U> DataFrame filter(BiPredicate<DataEntry, U> filter, U u) {
-		return newInstance(IterablePipe.super.filter(filter, u));
-	}
-
-	@Override
-	default DataFrame skip(int times) {
-		return newInstance(IterablePipe.super.skip(times));
-	}
-
-	@Override
-	default DataFrame limit(StopCriteriaImpl<DataEntry> stop) {
-		return newInstance(IterablePipe.super.limit(stop));
-	}
-
-	@Override
-	default DataFrame limit(Predicate<DataEntry> stop) {
-		return newInstance(IterablePipe.super.limit(stop));
-	}
-
-	@Override
-	default <U> DataFrame limit(BiPredicate<DataEntry, U> stop, U u) {
-		return newInstance(IterablePipe.super.limit(stop, u));
-	}
-
-	@Override
-	default DataFrame limit(int times) {
-		return newInstance(IterablePipe.super.limit(times));
+	default DFColumn get(String name) {
+		return map(DFRow::get, name).apply(DFColumn::asColumn);
 	}
 
 }

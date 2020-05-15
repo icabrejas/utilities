@@ -39,6 +39,8 @@
     <module>utilities-symbolicmath</module>
     <module>dataframe</module>
     <module>utilities-dafaframe</module>
+    <module>iterablepipe</module>
+    <module>utilities-iterablepipe</module>
   </modules>
 	
 </project>

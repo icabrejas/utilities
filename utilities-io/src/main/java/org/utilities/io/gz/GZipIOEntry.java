@@ -17,10 +17,9 @@ public class GZipIOEntry implements IOEntry {
 	}
 
 	@Override
-	public GZIPInputStream getContent() throws QuietException {
+	public GZIPInputStream get() throws QuietException {
 		try {
-			InputStream inputStream = this.inputStream.get();
-			return new GZIPInputStream(inputStream);
+			return new GZIPInputStream(inputStream.get());
 		} catch (IOException e) {
 			throw new QuietException(e);
 		}

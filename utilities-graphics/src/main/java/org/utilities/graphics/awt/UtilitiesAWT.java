@@ -92,15 +92,15 @@ public class UtilitiesAWT {
 
 	public static Range<Double> getViewboxRange(Supplier<Rectangle2D> viewbox, Function<Rectangle2D, Double> min,
 			Function<Rectangle2D, Double> max) {
-		Supplier<Double> min_ = SupplierPlus.map(viewbox, min);
-		Supplier<Double> max_ = SupplierPlus.map(viewbox, max);
+		Supplier<Double> min_ = SupplierPlus.andThen(viewbox, min);
+		Supplier<Double> max_ = SupplierPlus.andThen(viewbox, max);
 		return new Range.Double(min_, max_);
 	}
 
 	public static Range<Integer> getViewportRange(Supplier<Rectangle> viewport, Function<Rectangle, Integer> min,
 			Function<Rectangle, Integer> max, Orientation orient) {
-		Supplier<Integer> min_ = SupplierPlus.map(viewport, min);
-		Supplier<Integer> max_ = SupplierPlus.map(viewport, max);
+		Supplier<Integer> min_ = SupplierPlus.andThen(viewport, min);
+		Supplier<Integer> max_ = SupplierPlus.andThen(viewport, max);
 		switch (orient) {
 		case POSITIVE:
 			return new Range.Int(min_, max_);

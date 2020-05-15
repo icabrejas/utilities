@@ -27,7 +27,7 @@ public class ZipIOEntry implements IOEntry {
 	}
 
 	@Override
-	public InputStream getContent() {
+	public InputStream get() {
 		return new ByteArrayInputStream(bytes);
 	}
 

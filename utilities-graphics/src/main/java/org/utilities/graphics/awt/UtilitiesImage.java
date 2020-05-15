@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.Base64.Decoder;
 import java.util.Base64.Encoder;
 import java.util.Collections;
@@ -165,7 +166,7 @@ public class UtilitiesImage {
 				reader.setInput(inputStream);
 				IIOMetadata metadata = reader.getImageMetadata(0);
 				if (metadata != null) {
-					return IterablePipe.create(metadata.getMetadataFormatNames())
+					return IterablePipe.create(Arrays.asList(metadata.getMetadataFormatNames()))
 							.map(metadata::getAsTree)
 							.toList();
 				} else {

@@ -9,9 +9,9 @@ import java.util.function.Function;
 import org.utilities.core.lang.iterable.IterablePipe;
 import org.utilities.core.util.function.BiFunctionPlus;
 import org.utilities.core.util.map.NotNullMap;
-import org.utilities.dataframe.dataentry.DataEntry;
-import org.utilities.dataframe.dataentry.DataEntryImpl;
-import org.utilities.dataframe.datavalue.DataValue;
+import org.utilities.dataframe.cell.DFCell;
+import org.utilities.dataframe.row.DFRow;
+import org.utilities.dataframe.row.DFRowImpl;
 import org.utilities.timeseries.Event;
 
 public interface Summary<I> extends Function<List<Event>, Event> {
@@ -19,15 +19,15 @@ public interface Summary<I> extends Function<List<Event>, Event> {
 	public static class ByColumn<I> implements Summary<I> {
 
 		private Function<Iterable<Instant>, Instant> instant;
-		private Function<Iterable<DataValue>, DataValue> summary;
+		private Function<Iterable<DFCell>, DFCell> summary;
 
 		public ByColumn(Function<Iterable<Instant>, Instant> unixtime,
-				Function<Iterable<DataValue>, DataValue> summary) {
+				Function<Iterable<DFCell>, DFCell> summary) {
 			this.instant = unixtime;
 			this.summary = summary;
 		}
 
-		public ByColumn(long window, Function<Iterable<DataValue>, DataValue> summary) {
+		public ByColumn(long window, Function<Iterable<DFCell>, DFCell> summary) {
 			this.instant = BiFunctionPlus.parseFunction(Summary.ByColumn::unixtime, window);
 			this.summary = summary;
 		}
@@ -62,21 +62,22 @@ public interface Summary<I> extends Function<List<Event>, Event> {
 		}
 
 		private Instant unixtime(List<Event> events) {
-			return IterablePipe.newInstance(events)
+			return IterablePipe.create(events)
 					.map(Event::getTime)
 					.apply(this.instant);
 		}
 
-		private DataEntry summarize(Iterable<Event> events) {
-			NotNullMap<String, List<DataValue>> rawValues = new NotNullMap<>(ArrayList::new);
+		private DFRow summarize(Iterable<Event> events) {
+			// FIXME remove (use map.computeIfAbsent(key, k->new ArrayList<>()))
+			NotNullMap<String, List<DFCell>> rawValues = new NotNullMap<>(ArrayList::new);
 			for (Event evt : events) {
 				for (String name : evt.keys()) {
-					DataValue value = evt.get(name);
+					DFCell value = evt.get(name);
 					rawValues.get(name)
 							.add(value);
 				}
 			}
-			DataEntryImpl summaryValues = new DataEntryImpl();
+			DFRowImpl summaryValues = new DFRowImpl();
 			for (String label : rawValues.keySet()) {
 				summaryValues.put(label, summary.apply(rawValues.get(label)));
 			}

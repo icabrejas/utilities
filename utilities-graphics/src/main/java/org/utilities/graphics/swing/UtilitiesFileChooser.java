@@ -2,6 +2,7 @@ package org.utilities.graphics.swing;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.Arrays;
 import java.util.function.Function;
 
 import javax.swing.JFileChooser;
@@ -58,7 +59,7 @@ public class UtilitiesFileChooser {
 
 	public static <T> IterablePipe<T> showOpenMultipleDialog(Function<File, T> mapper, String defaultPath,
 			String... fileExtension) {
-		return IterablePipe.create(showOpenMultipleDialog(defaultPath, fileExtension))
+		return IterablePipe.create(Arrays.asList(showOpenMultipleDialog(defaultPath, fileExtension)))
 				.map(mapper);
 	}
 

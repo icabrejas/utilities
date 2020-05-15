@@ -8,6 +8,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
+import org.utilities.core.UtilitiesConcurrent;
 import org.utilities.core.lang.exception.QuietException;
 
 public class ParallelCaller<T> implements Iterable<T> {

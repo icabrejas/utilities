@@ -3,6 +3,7 @@ package org.utilities.core.util.concurrent;
 import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 
+import org.utilities.core.UtilitiesConcurrent;
 import org.utilities.core.lang.exception.QuietException;
 
 public class ParallelRunner {

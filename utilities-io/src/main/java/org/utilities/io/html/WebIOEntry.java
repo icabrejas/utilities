@@ -13,7 +13,7 @@ public class WebIOEntry implements IOEntry {
 	}
 
 	@Override
-	public InputStream getContent() {
+	public InputStream get() {
 		return UtilitiesScraping.getInputStream(url);
 	}
 

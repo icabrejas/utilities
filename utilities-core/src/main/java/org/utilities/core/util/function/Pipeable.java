@@ -6,18 +6,13 @@ import java.util.function.Function;
 public interface Pipeable<T> {
 
 	@SuppressWarnings("unchecked")
-	default <R> R apply(Function<T, R> func) {
+	default <R> R apply(Function<? super T, R> func) {
 		return func.apply((T) this);
 	}
 
 	@SuppressWarnings("unchecked")
-	public default <U, R> R apply(BiFunction<T, U, R> func, U u) {
+	public default <U, R> R apply(BiFunction<? super T, U, R> func, U u) {
 		return func.apply((T) this, u);
-	}
-
-	@SuppressWarnings("unchecked")
-	public default Pipeline<T> pipe() {
-		return Pipeline.newInstance((T) this);
 	}
 
 }

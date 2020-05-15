@@ -83,7 +83,7 @@ public class UtilitiesS3 {
 			commonPrefixes.addAll(pageMarker.getCommonPrefixes());
 			request.setContinuationToken(pageMarker.getNextContinuationToken());
 		}
-		return IterablePipe.newInstance(commonPrefixes);
+		return IterablePipe.create(commonPrefixes);
 	}
 
 }

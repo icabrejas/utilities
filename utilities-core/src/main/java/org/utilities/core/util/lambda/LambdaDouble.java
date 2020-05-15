@@ -1,6 +1,6 @@
 package org.utilities.core.util.lambda;
 
-import org.utilities.core.lang.UtilitiesNumber;
+import org.utilities.core.UtilitiesNumber;
 
 public class LambdaDouble extends LambdaValue<Double> {
 
@@ -12,11 +12,11 @@ public class LambdaDouble extends LambdaValue<Double> {
 	}
 
 	public double min(double x) {
-		return set(UtilitiesNumber.min(get(), x));
+		return apply(UtilitiesNumber::min, x);
 	}
 
 	public double max(double x) {
-		return set(UtilitiesNumber.max(get(), x));
+		return apply(UtilitiesNumber::max, x);
 	}
 
 }

@@ -5,9 +5,9 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import org.utilities.core.UtilitiesTime;
 import org.utilities.core.lang.exception.QuietException;
-import org.utilities.core.time.UtilitiesTime;
-import org.utilities.dataframe.dataentry.DataEntry;
+import org.utilities.dataframe.row.DFRow;
 import org.utilities.io.csv.UtilitiesCSV;
 import org.utilities.io.csv.bean.IterableCSVBean;
 import org.utilities.io.csv.string.IterablePipeCSV;
@@ -145,27 +145,26 @@ public class UtilitiesIOMapping {
 		}
 
 		public static GZipIOEntry parseGZip(S3IOEntry entryS3) {
-			return UtilitiesGZip.newEntryGZip(entryS3::getContent);
+			return UtilitiesGZip.newEntryGZip(entryS3::get);
 		}
 
 	}
 
 	public static class CSV {
 
-		public static Function<DataEntry, Event> parseEventMapper(String datetimeLabel, String pattern) {
+		public static Function<DFRow, Event> parseEventMapper(String datetimeLabel, String pattern) {
 			return parseEventMapper(datetimeLabel, UtilitiesTime.unixParser(pattern));
 		}
 
-		public static Function<DataEntry, Event> parseEventMapper(String datetimeLabel) {
+		public static Function<DFRow, Event> parseEventMapper(String datetimeLabel) {
 			return parseEventMapper(datetimeLabel, Long::parseLong);
 		}
 
-		public static Function<DataEntry, Event> parseEventMapper(String datetimeLabel,
-				Function<String, Long> unixtime) {
+		public static Function<DFRow, Event> parseEventMapper(String datetimeLabel, Function<String, Long> unixtime) {
 			return entry -> parseEvent(entry, datetimeLabel, unixtime);
 		}
 
-		public static Event parseEvent(DataEntry entry, String datetimeLabel, Function<String, Long> unixtime) {
+		public static Event parseEvent(DFRow entry, String datetimeLabel, Function<String, Long> unixtime) {
 			String dateTime = entry.getString(datetimeLabel);
 			Instant unixtime_ = Instant.ofEpochMilli(unixtime.apply(dateTime));
 			Event evt = new Event(unixtime_);
@@ -174,22 +173,22 @@ public class UtilitiesIOMapping {
 			return evt;
 		}
 
-		public static Function<DataEntry, Event> parseEventMapper(String dateLabel, String timeLabel, String pattern) {
+		public static Function<DFRow, Event> parseEventMapper(String dateLabel, String timeLabel, String pattern) {
 			return parseEventMapper(dateLabel, timeLabel, " ", pattern);
 		}
 
-		public static Function<DataEntry, Event> parseEventMapper(String dateLabel, String timeLabel, String separator,
+		public static Function<DFRow, Event> parseEventMapper(String dateLabel, String timeLabel, String separator,
 				String pattern) {
 			Function<String, Long> parser = UtilitiesTime.unixParser(pattern);
 			return parseEventMapper(dateLabel, timeLabel, (_date, _time) -> parser.apply(_date + separator + _time));
 		}
 
-		public static Function<DataEntry, Event> parseEventMapper(String dateLabel, String timeLabel,
+		public static Function<DFRow, Event> parseEventMapper(String dateLabel, String timeLabel,
 				BiFunction<String, String, Long> unixtime) {
 			return entry -> parseEvent(entry, dateLabel, timeLabel, unixtime);
 		}
 
-		public static Event parseEvent(DataEntry entry, String dateLabel, String timeLabel,
+		public static Event parseEvent(DFRow entry, String dateLabel, String timeLabel,
 				BiFunction<String, String, Long> unixtime) {
 			String date = entry.getString(dateLabel);
 			String time = entry.getString(timeLabel);

@@ -12,6 +12,7 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Serializable;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 
 import org.apache.commons.io.IOUtils;
 import org.utilities.core.lang.exception.QuietException;
@@ -27,7 +28,7 @@ public class UtilitiesIO {
 
 	public static IterablePipe<File> dir(File src, boolean recursive) {
 		if (!recursive) {
-			return IterablePipe.create(src.listFiles());
+			return IterablePipe.create(Arrays.asList(src.listFiles()));
 		} else {
 			return IterableFiles.newInstance(src);
 		}

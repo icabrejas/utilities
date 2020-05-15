@@ -9,8 +9,8 @@ import java.util.function.Supplier;
 
 import org.utilities.core.lang.exception.QuietException;
 import org.utilities.dataframe.DataFrame;
-import org.utilities.dataframe.dataentry.DataEntry;
-import org.utilities.dataframe.dataentry.DataEntryImpl;
+import org.utilities.dataframe.row.DFRow;
+import org.utilities.dataframe.row.DFRowImpl;
 import org.utilities.io.IteratorCloseable;
 import org.utilities.io.csv.CSVReaderBuilder;
 import org.utilities.io.csv.UtilitiesCSV;
@@ -73,7 +73,7 @@ public class IterablePipeCSV implements DataFrame {
 	}
 
 	@Override
-	public IteratorCloseable<DataEntry> iterator() {
+	public IteratorCloseable<DFRow> iterator() {
 		try {
 			IterablePipeCSV.It it = new IterablePipeCSV.It(reader.get(), headers, trim);
 			return new IteratorCloseable<>(it, it);
@@ -95,7 +95,7 @@ public class IterablePipeCSV implements DataFrame {
 		return "IterableCSVString [headers=" + headers + ", trim=" + trim + "]";
 	}
 
-	private static class It implements Iterator<DataEntry>, Closeable {
+	private static class It implements Iterator<DFRow>, Closeable {
 
 		private IteratorCloseable<String[]> it;
 		private String[] headers;
@@ -115,8 +115,8 @@ public class IterablePipeCSV implements DataFrame {
 		}
 
 		@Override
-		public DataEntry next() {
-			DataEntryImpl entry = new DataEntryImpl();
+		public DFRow next() {
+			DFRowImpl entry = new DFRowImpl();
 			String[] fields = it.next();
 			for (int i = 0; i < headers.length; i++) {
 				if (trim) {

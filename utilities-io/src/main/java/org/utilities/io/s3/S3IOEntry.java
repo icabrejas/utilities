@@ -41,7 +41,7 @@ public abstract class S3IOEntry implements IOEntry {
 		}
 
 		@Override
-		public InputStream getContent() {
+		public InputStream get() {
 			return SupplierPlus.Noisy.tryToGet(this::getObjectContent, trials, waitTime);
 		}
 
@@ -68,7 +68,7 @@ public abstract class S3IOEntry implements IOEntry {
 		}
 
 		@Override
-		public InputStream getContent() {
+		public InputStream get() {
 			return SupplierPlus.Noisy.tryToGet(this::getObjectContent, trials, waitTime);
 		}
 

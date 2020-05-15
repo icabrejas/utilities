@@ -10,8 +10,8 @@ public class LambdaBoolean extends LambdaValue<Boolean> {
 		super(value);
 	}
 
-	public boolean negative() {
-		return set(!get());
+	public boolean negate() {
+		return apply(x -> !x);
 	}
 
 }

@@ -5,7 +5,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.utilities.core.time.UtilitiesTime;
+import org.utilities.core.UtilitiesTime;
 
 public class TrackedFuture<V> implements Future<V> {
 
@@ -13,7 +13,7 @@ public class TrackedFuture<V> implements Future<V> {
 	private TrackedCallable<V> trackedCallable;
 	private long submitTime;
 
-	protected TrackedFuture(Future<V> future, TrackedCallable<V> trackedCallable) {
+	public TrackedFuture(Future<V> future, TrackedCallable<V> trackedCallable) {
 		this.future = future;
 		this.submitTime = System.currentTimeMillis();
 		this.trackedCallable = trackedCallable;

@@ -9,7 +9,33 @@ public interface RunnablePlus extends Runnable {
 		};
 	}
 
-	static RunnablePlus parseQuiet(Noisy noisy) {
+	static RunnablePlus create(Runnable runnable) {
+		return runnable::run;
+	}
+
+	static <T> ConsumerPlus<T> parseConsumer(Runnable runnable) {
+		return t -> runnable.run();
+	}
+
+	default RunnablePlus andThen(Runnable runnable) {
+		return () -> {
+			this.run();
+			runnable.run();
+		};
+	}
+
+	default RunnablePlus compose(Runnable runnable) {
+		return () -> {
+			runnable.run();
+			this.run();
+		};
+	}
+
+	default <T> ConsumerPlus<T> parseConsumer() {
+		return RunnablePlus.parseConsumer(this);
+	}
+
+	static RunnablePlus parseQuiet(RunnablePlus.Noisy noisy) {
 		return () -> {
 			try {
 				noisy.run();
@@ -23,7 +49,7 @@ public interface RunnablePlus extends Runnable {
 
 		void run() throws Exception;
 
-		public static <T, R> void tryToRun(RunnablePlus.Noisy runnable, T t, int maxTimes) {
+		public static void tryToRun(RunnablePlus.Noisy runnable, int maxTimes) throws QuietException {
 			int fails = 0;
 			boolean executed = false;
 			while (!executed) {
@@ -31,7 +57,7 @@ public interface RunnablePlus extends Runnable {
 					runnable.run();
 					executed = true;
 				} catch (Exception e) {
-					if (++fails == 3) {
+					if (++fails == maxTimes) {
 						throw new QuietException(e);
 					}
 				}
@@ -39,4 +65,5 @@ public interface RunnablePlus extends Runnable {
 		}
 
 	}
+
 }

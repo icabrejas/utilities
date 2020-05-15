@@ -60,7 +60,7 @@ public class UtilitiesGZip {
 
 	public static GZIPInputStream getInputStream(File file) {
 		return UtilitiesGZip.newEntryGZip(file)
-				.getContent();
+				.get();
 	}
 
 }

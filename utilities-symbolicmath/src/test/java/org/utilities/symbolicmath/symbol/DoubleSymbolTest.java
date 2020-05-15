@@ -11,9 +11,9 @@ import junit.framework.TestCase;
 @RunWith(MockitoJUnitRunner.class)
 public class DoubleSymbolTest extends TestCase {
 
-	private DoubleSymbol<Store> VAR1 = variable("VAR1");
-	private DoubleSymbol<Store> VAR2 = variable("VAR2");
-	private DoubleSymbol<Store> VAR3 = variable("VAR3");
+	private SymbolDouble<Store> VAR1 = variable("VAR1");
+	private SymbolDouble<Store> VAR2 = variable("VAR2");
+	private SymbolDouble<Store> VAR3 = variable("VAR3");
 
 	@Test
 	public void testAdd23() {
@@ -110,19 +110,19 @@ public class DoubleSymbolTest extends TestCase {
 	@Test
 	public void testIf() {
 		Store store = store(4, 5, 1);
-		assertEquals(1., VAR2.greater(true, VAR1)
+		assertEquals(1., VAR2.greater(VAR1)
 				.ifElse(VAR3)
 				.apply(store));
-		assertNull(VAR2.lower(true, VAR1)
+		assertNull(VAR2.lower(VAR1)
 				.ifElse(VAR3)
 				.apply(store));
-		assertEquals(4., VAR2.lower(true, DoubleSymbol.constant(10.))
+		assertEquals(4., VAR2.lower(SymbolDouble.constant(10.))
 				.ifElse(VAR1)
 				.apply(store));
 	}
 
-	private DoubleSymbol<Store> variable(String variable) {
-		return store -> store.get(variable);
+	private SymbolDouble<Store> variable(String variable) {
+		return SymbolDouble.as(store -> store.get(variable));
 	}
 
 	private Store store(double... values) {

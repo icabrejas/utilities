@@ -1,15 +1,20 @@
 package org.utilities.core.util.function;
 
+import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.utilities.core.UtilitiesConcurrent;
 import org.utilities.core.lang.exception.QuietException;
-import org.utilities.core.util.concurrent.UtilitiesConcurrent;
 
 public interface SupplierPlus<T> extends Supplier<T> {
+
+	public static <T> SupplierPlus<T> dummy() {
+		return newInstance(null);
+	}
 
 	public static <T> SupplierPlus<T> newInstance(Supplier<T> supplier) {
 		return supplier::get;
@@ -19,20 +24,22 @@ public interface SupplierPlus<T> extends Supplier<T> {
 		return () -> t;
 	}
 
-	public static <T, U, R> SupplierPlus<R> map(Supplier<T> supplier, BiFunction<T, U, R> mapper, U u) {
-		return () -> mapper.apply(supplier.get(), u);
+	public static <T, U, R> SupplierPlus<R> andThen(Supplier<T> supplier, BiFunction<T, U, R> after, U u) {
+		Objects.requireNonNull(after);
+		return () -> after.apply(supplier.get(), u);
 	}
 
-	public static <T, R> SupplierPlus<R> map(Supplier<T> supplier, Function<T, R> mapper) {
-		return () -> mapper.apply(supplier.get());
+	public static <T, R> SupplierPlus<R> andThen(Supplier<T> supplier, Function<T, R> after) {
+		Objects.requireNonNull(after);
+		return () -> after.apply(supplier.get());
 	}
 
-	public default <R> SupplierPlus<R> map(Function<T, R> mapper) {
-		return SupplierPlus.map(this, mapper);
+	public default <R> SupplierPlus<R> andThen(Function<T, R> after) {
+		return SupplierPlus.andThen(this, after);
 	}
 
 	public default <U, R> SupplierPlus<R> map(BiFunction<T, U, R> mapper, U u) {
-		return SupplierPlus.map(this, mapper, u);
+		return SupplierPlus.andThen(this, mapper, u);
 	}
 
 	public static <T> SupplierPlus<T> parseQuiet(Noisy<T> noisy) {

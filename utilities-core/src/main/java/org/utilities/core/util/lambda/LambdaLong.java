@@ -1,6 +1,6 @@
 package org.utilities.core.util.lambda;
 
-import org.utilities.core.lang.UtilitiesNumber;
+import org.utilities.core.UtilitiesNumber;
 
 public class LambdaLong extends LambdaValue<Long> {
 
@@ -11,8 +11,12 @@ public class LambdaLong extends LambdaValue<Long> {
 		super(value);
 	}
 
-	public long add(long amount) {
-		return set(UtilitiesNumber.sum(get(), amount));
+	public long increment() {
+		return increment(1);
+	}
+
+	public long increment(long amount) {
+		return apply(UtilitiesNumber::sum, amount);
 	}
 
 }

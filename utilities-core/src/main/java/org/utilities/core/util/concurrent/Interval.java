@@ -1,5 +1,7 @@
 package org.utilities.core.util.concurrent;
 
+import org.utilities.core.UtilitiesConcurrent;
+
 public class Interval {
 
 	private boolean stop = true;

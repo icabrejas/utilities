@@ -1,5 +1,7 @@
 package org.utilities.symbolicmath.utils;
 
+import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
+import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.apache.commons.math3.stat.descriptive.moment.VectorialCovariance;
 import org.apache.commons.math3.stat.descriptive.moment.VectorialMean;
 
@@ -20,6 +22,10 @@ public class StatisticsUtils {
 		}
 		return vectorialCovariance.getResult()
 				.getData();
+	}
+
+	public static PolynomialSplineFunction linearInterpolator(double[] x, double[] y) {
+		return new LinearInterpolator().interpolate(x, y);
 	}
 
 }

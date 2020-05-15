@@ -1,7 +1,7 @@
 package test;
 
+import org.utilities.core.UtilitiesConcurrent;
 import org.utilities.core.queue.Queue;
-import org.utilities.core.util.concurrent.UtilitiesConcurrent;
 
 public class AppQueue {
 
