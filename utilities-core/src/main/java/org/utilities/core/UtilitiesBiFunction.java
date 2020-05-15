@@ -14,41 +14,43 @@ import java.util.function.ToDoubleBiFunction;
 import java.util.function.ToIntBiFunction;
 import java.util.function.ToLongBiFunction;
 
+import org.utilities.core.util.function.BiFunctionPlus;
+import org.utilities.core.util.function.FunctionPlus;
 import org.utilities.core.util.pair.Pair;
 
 public class UtilitiesBiFunction {
 
-	public static <T, U, R> BiFunction<T, U, R> dummy() {
+	public static <T, U, R> BiFunctionPlus<T, U, R> dummy() {
 		return dummy(null);
 	}
 
-	public static <T, U, R> BiFunction<T, U, R> dummy(R r) {
+	public static <T, U, R> BiFunctionPlus<T, U, R> dummy(R r) {
 		return (T t, U u) -> r;
 	}
 
-	public static <T, U, R> Function<T, R> parseFunction(BiFunction<T, U, ? extends R> biFunction, U u) {
+	public static <T, U, R> FunctionPlus<T, R> parseFunction(BiFunction<T, U, ? extends R> biFunction, U u) {
 		return t -> biFunction.apply(t, u);
 	}
 
-	public static <T, U, R> Function<T, R> parseFunction(BiFunction<T, U, ? extends R> biFunction,
+	public static <T, U, R> FunctionPlus<T, R> parseFunction(BiFunction<T, U, ? extends R> biFunction,
 			Supplier<? extends U> u) {
 		return t -> biFunction.apply(t, u.get());
 	}
 
-	public static <T, U, R> Function<T, R> parseFunction(BiFunction<T, U, ? extends R> biFunction,
+	public static <T, U, R> FunctionPlus<T, R> parseFunction(BiFunction<T, U, ? extends R> biFunction,
 			Function<T, ? extends U> u) {
 		return t -> biFunction.apply(t, u.apply(t));
 	}
 
-	public static <T, U, R> Function<Pair<T, U>, R> parseFunction(BiFunction<T, U, R> biFunction) {
+	public static <T, U, R> FunctionPlus<Pair<T, U>, R> parseFunction(BiFunction<T, U, R> biFunction) {
 		return pair -> biFunction.apply(pair.getX(), pair.getY());
 	}
 
-	public static <T, U, R> BiFunction<U, T, R> flip(BiFunction<T, U, R> biFunction) {
+	public static <T, U, R> BiFunctionPlus<U, T, R> flip(BiFunction<T, U, R> biFunction) {
 		return (u, t) -> biFunction.apply(t, u);
 	}
 
-	public static <T, U, R> BiFunction<T, U, R> applyIfNotNull(BiFunction<T, U, R> biFunction) {
+	public static <T, U, R> BiFunctionPlus<T, U, R> applyIfNotNull(BiFunction<T, U, R> biFunction) {
 		return (t, u) -> applyIfNotNull(t, u, biFunction);
 	}
 

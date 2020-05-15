@@ -1,9 +1,8 @@
 package org.utilities.graphics.awt.scale;
 
-
 import java.util.function.Function;
 
-import org.utilities.core.util.function.FunctionPlus;
+import org.utilities.core.UtilitiesFunction;
 
 public interface Scale<I, O> {
 
@@ -27,8 +26,8 @@ public interface Scale<I, O> {
 	}
 
 	public static <I, O> Scale<I, O> newInstance(Range<I> input, Range<O> output) {
-		Function<I, O> transform = FunctionPlus.compose(output::get, input::project);
-		Function<O, I> invert = FunctionPlus.compose(input::get, output::project);
+		Function<I, O> transform = UtilitiesFunction.compose(output::get, input::project);
+		Function<O, I> invert = UtilitiesFunction.compose(input::get, output::project);
 		return newInstance(transform, invert);
 	}
 

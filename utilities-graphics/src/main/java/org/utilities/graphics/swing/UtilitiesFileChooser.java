@@ -8,16 +8,16 @@ import java.util.function.Function;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import org.utilities.core.UtilitiesFunction;
 import org.utilities.core.lang.exception.QuietException;
 import org.utilities.core.lang.iterable.IterablePipe;
-import org.utilities.core.util.function.FunctionPlus;
 import org.utilities.graphics.awt.UtilitiesImage;
 
 public class UtilitiesFileChooser {
 
 	public static <T> T showOpenDialog(Function<File, T> mapper, String defaultPath, String... fileExtensions) {
 		File file = UtilitiesFileChooser.showOpenDialog(defaultPath, fileExtensions);
-		return FunctionPlus.applyIfNotNull(file, mapper);
+		return UtilitiesFunction.applyIfNotNull(file, mapper);
 	}
 
 	public static File showOpenDialog(String defaultPath, String... fileExtensions) {

@@ -13,10 +13,8 @@ public interface SymbolStore<T> {
 	T[] range(String label, int window);
 
 	void subscribe(SymbolStoreConsumer subscriber);
-	
 
-
-	public static <T> SymbolStore<T> dummy(){
+	public static <T> SymbolStore<T> dummy() {
 		return new SymbolStore<T>() {
 
 			@Override

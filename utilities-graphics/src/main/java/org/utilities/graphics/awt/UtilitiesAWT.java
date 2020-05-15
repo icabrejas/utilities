@@ -30,9 +30,9 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.event.ListSelectionEvent;
 
+import org.utilities.core.UtilitiesFunction;
 import org.utilities.core.lang.exception.QuietException;
 import org.utilities.core.util.function.BiConsumerPlus;
-import org.utilities.core.util.function.FunctionPlus;
 import org.utilities.core.util.function.SupplierPlus;
 import org.utilities.graphics.awt.component.listeners.ActionListenerImpl;
 import org.utilities.graphics.awt.component.listeners.ComponentListenerImpl;
@@ -73,8 +73,8 @@ public class UtilitiesAWT {
 		Function<Rectangle2D, Double> minIn = Rectangle2D::getMinX;
 		Function<Rectangle2D, Double> maxIn = Rectangle2D::getMaxX;
 		Range<Double> input = getViewboxRange(viewbox, minIn, maxIn);
-		Function<Rectangle, Integer> minOut = FunctionPlus.compose(Double::intValue, Rectangle2D::getMinX);
-		Function<Rectangle, Integer> maxOut = FunctionPlus.compose(Double::intValue, Rectangle2D::getMaxX);
+		Function<Rectangle, Integer> minOut = UtilitiesFunction.compose(Double::intValue, Rectangle2D::getMinX);
+		Function<Rectangle, Integer> maxOut = UtilitiesFunction.compose(Double::intValue, Rectangle2D::getMaxX);
 		Range<Integer> output = getViewportRange(viewport, minOut, maxOut, Orientation.POSITIVE);
 		return Scale.newInstance(input, output);
 	}
@@ -84,8 +84,8 @@ public class UtilitiesAWT {
 		Function<Rectangle2D, Double> minIn = Rectangle2D::getMinY;
 		Function<Rectangle2D, Double> maxIn = Rectangle2D::getMaxY;
 		Range<Double> input = getViewboxRange(viewbox, minIn, maxIn);
-		Function<Rectangle, Integer> minOut = FunctionPlus.compose(Double::intValue, Rectangle2D::getMinY);
-		Function<Rectangle, Integer> maxOut = FunctionPlus.compose(Double::intValue, Rectangle2D::getMaxY);
+		Function<Rectangle, Integer> minOut = UtilitiesFunction.compose(Double::intValue, Rectangle2D::getMinY);
+		Function<Rectangle, Integer> maxOut = UtilitiesFunction.compose(Double::intValue, Rectangle2D::getMaxY);
 		Range<Integer> output = getViewportRange(viewport, minOut, maxOut, orient);
 		return Scale.newInstance(input, output);
 	}

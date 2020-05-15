@@ -2,7 +2,7 @@ package org.utilities.symbolicmath.store.rolling;
 
 import java.util.function.Function;
 
-import org.utilities.core.util.function.FunctionPlus;
+import org.utilities.core.UtilitiesFunction;
 import org.utilities.symbolicmath.store.SymbolStore;
 import org.utilities.symbolicmath.store.symbol.Range;
 import org.utilities.symbolicmath.symbol.SymbolDouble;
@@ -24,7 +24,7 @@ public class RollingUtils {
 	public static <T> SymbolDouble<SymbolStore<T>> summarize(String label, int window, boolean nullOmit,
 			Function<T, Double> parseDouble, SummarizerDouble<T> summarizer) {
 		SymbolArrayDoublePrimitive<SymbolStore<T>> symbol = new Range<T>(label, window)//
-				.andThenForeach(FunctionPlus.applyIfNotNull(parseDouble), Double[]::new)
+				.andThenForeach(UtilitiesFunction.applyIfNotNull(parseDouble), Double[]::new)
 				.apply(SymbolArrayDouble::as)
 				.toPrimitive(nullOmit);
 		return summarizer.apply(symbol);

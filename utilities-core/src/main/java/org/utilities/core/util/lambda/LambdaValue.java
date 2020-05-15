@@ -3,7 +3,7 @@ package org.utilities.core.util.lambda;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-import org.utilities.core.util.function.BiFunctionPlus;
+import org.utilities.core.UtilitiesBiFunction;
 
 public class LambdaValue<T> {
 
@@ -39,7 +39,7 @@ public class LambdaValue<T> {
 	}
 
 	public <U> T apply(BiFunction<T, U, T> func, U u) {
-		return apply(BiFunctionPlus.parseFunction(func, u));
+		return apply(UtilitiesBiFunction.parseFunction(func, u));
 	}
 
 	@Override

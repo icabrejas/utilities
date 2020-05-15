@@ -4,6 +4,7 @@ import java.io.Reader;
 import java.util.function.Supplier;
 
 import com.opencsv.CSVParser;
+import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
 
 public class CSVReaderBuilder implements Supplier<CSVReader> {
@@ -12,7 +13,7 @@ public class CSVReaderBuilder implements Supplier<CSVReader> {
 	private char separator = CSVParser.DEFAULT_SEPARATOR;
 	private char quotechar = CSVParser.DEFAULT_QUOTE_CHARACTER;
 	private char escape = CSVParser.DEFAULT_ESCAPE_CHARACTER;
-	private int line = 0;
+	private int line = 0; // TODO skip lines?
 	private boolean strictQuotes = CSVParser.DEFAULT_STRICT_QUOTES;
 	private boolean ignoreLeadingWhiteSpace = CSVParser.DEFAULT_IGNORE_LEADING_WHITESPACE;
 	private boolean keepCR = false;
@@ -58,8 +59,16 @@ public class CSVReaderBuilder implements Supplier<CSVReader> {
 
 	@Override
 	public CSVReader get() {
-		return new CSVReader(reader.get(), separator, quotechar, escape, line, strictQuotes, ignoreLeadingWhiteSpace,
-				keepCR);
+		CSVParser parser = new CSVParserBuilder()//
+				.withSeparator(separator)
+				.withQuoteChar(quotechar)
+				.withEscapeChar(escape)
+				.withStrictQuotes(strictQuotes)
+				.withIgnoreLeadingWhiteSpace(ignoreLeadingWhiteSpace)
+				.build();
+		return new com.opencsv.CSVReaderBuilder(reader.get())//
+				.withCSVParser(parser)
+				.build();
 	}
 
 	@Override

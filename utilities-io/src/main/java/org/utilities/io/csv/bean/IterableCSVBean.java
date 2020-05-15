@@ -14,7 +14,8 @@ import org.utilities.io.csv.CSVReaderBuilder;
 import org.utilities.io.csv.UtilitiesCSV;
 
 import com.opencsv.CSVReader;
-import com.opencsv.bean.IterableCSVToBean;
+import com.opencsv.bean.CsvToBean;
+import com.opencsv.bean.CsvToBeanBuilder;
 import com.opencsv.bean.MappingStrategy;
 
 public class IterableCSVBean<T> implements IterablePipe<T> {
@@ -86,7 +87,9 @@ public class IterableCSVBean<T> implements IterablePipe<T> {
 
 		public It(Supplier<CSVReader> reader, MappingStrategy<T> strategy) throws FileNotFoundException {
 			CSVReader reader_ = reader.get();
-			IterableCSVToBean<T> it = new IterableCSVToBean<>(reader_, strategy, null);
+			CsvToBean<T> it = new CsvToBeanBuilder<T>(reader_)//
+					.withMappingStrategy(strategy)
+					.build();
 			this.iteratorCloseable = new IteratorCloseable<>(it.iterator(), reader_);
 		}
 

@@ -4,6 +4,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import org.utilities.core.UtilitiesBiFunction;
 import org.utilities.core.UtilitiesFunction;
 
 public interface FunctionPlus<T, R> extends Function<T, R> {
@@ -18,7 +19,7 @@ public interface FunctionPlus<T, R> extends Function<T, R> {
 	}
 
 	default <U, V> FunctionPlus<T, V> andThen(BiFunction<R, U, V> after, U u) {
-		return andThen(BiFunctionPlus.parseFunction(after, u));
+		return andThen(UtilitiesBiFunction.parseFunction(after, u));
 	}
 
 	default <U, V> Function<T, R> ifElse(Predicate<T> expression, Function<T, R> if_, Function<T, R> else_) {

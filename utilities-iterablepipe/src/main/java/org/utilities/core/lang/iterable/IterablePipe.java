@@ -14,7 +14,9 @@ import java.util.function.IntSupplier;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import org.utilities.core.UtilitiesBiFunction;
 import org.utilities.core.UtilitiesConcurrent;
+import org.utilities.core.UtilitiesFunction;
 import org.utilities.core.lang.iterable.batch.IPBatch;
 import org.utilities.core.lang.iterable.batch.IPBatchSemaphore;
 import org.utilities.core.lang.iterable.filter.IPFilter;
@@ -27,9 +29,7 @@ import org.utilities.core.lang.iterable.map.IPMapper;
 import org.utilities.core.lang.iterable.track.IPTracked;
 import org.utilities.core.lang.iterable.track.IPTracker;
 import org.utilities.core.util.function.BiConsumerPlus;
-import org.utilities.core.util.function.BiFunctionPlus;
 import org.utilities.core.util.function.BiPredicatePlus;
-import org.utilities.core.util.function.FunctionPlus;
 import org.utilities.core.util.function.Pipeable;
 
 public interface IterablePipe<T> extends Iterable<T>, Pipeable<Iterable<T>> {
@@ -39,7 +39,7 @@ public interface IterablePipe<T> extends Iterable<T>, Pipeable<Iterable<T>> {
 	}
 
 	public static <T, U> IterablePipe<U> create(Function<T, ? extends Iterator<U>> it, T t) {
-		return create(FunctionPlus.parseSupplier(it, t));
+		return create(UtilitiesFunction.parseSupplier(it, t));
 	}
 
 	public static <T> IterablePipe<T> create(Iterable<T> it) {
@@ -76,11 +76,11 @@ public interface IterablePipe<T> extends Iterable<T>, Pipeable<Iterable<T>> {
 	}
 
 	public default <U, R> IterablePipe<R> map(BiFunction<T, U, R> mapper, U u) {
-		return map(BiFunctionPlus.parseFunction(mapper, u));
+		return map(UtilitiesBiFunction.parseFunction(mapper, u));
 	}
 
 	public default <U, R> IterablePipe<R> map(BiFunction<T, U, R> mapper, Supplier<? extends U> u) {
-		return map(BiFunctionPlus.parseFunction(mapper, u));
+		return map(UtilitiesBiFunction.parseFunction(mapper, u));
 	}
 
 	public default <R> IterablePipe<R> parallelMap(IPMapper<T, R> mapper, int nThreads) {
@@ -104,15 +104,15 @@ public interface IterablePipe<T> extends Iterable<T>, Pipeable<Iterable<T>> {
 	}
 
 	public default <U, R> IterablePipe<R> flatMap(BiFunction<T, U, Iterable<R>> mapper, U u) {
-		return flatMap(BiFunctionPlus.parseFunction(mapper, u));
+		return flatMap(UtilitiesBiFunction.parseFunction(mapper, u));
 	}
 
 	public default <U, R> IterablePipe<R> flatMap(BiFunction<T, U, Iterable<R>> mapper, Supplier<? extends U> u) {
-		return flatMap(BiFunctionPlus.parseFunction(mapper, u));
+		return flatMap(UtilitiesBiFunction.parseFunction(mapper, u));
 	}
 
 	public default <U, R> IterablePipe<R> flatMap(BiFunction<T, U, Iterable<R>> mapper, Function<T, ? extends U> u) {
-		return flatMap(BiFunctionPlus.parseFunction(mapper, u));
+		return flatMap(UtilitiesBiFunction.parseFunction(mapper, u));
 	}
 
 	public default <R> IterablePipe<R> parallelFlatMap(Function<T, ? extends Iterable<R>> mapper) {

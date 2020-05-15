@@ -1,6 +1,5 @@
 package org.utilities.io.mapping;
 
-import java.time.Instant;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -164,13 +163,9 @@ public class UtilitiesIOMapping {
 			return entry -> parseEvent(entry, datetimeLabel, unixtime);
 		}
 
+		// FIXME use unixtime parser
 		public static Event parseEvent(DFRow entry, String datetimeLabel, Function<String, Long> unixtime) {
-			String dateTime = entry.getString(datetimeLabel);
-			Instant unixtime_ = Instant.ofEpochMilli(unixtime.apply(dateTime));
-			Event evt = new Event(unixtime_);
-			entry = entry.remove(datetimeLabel);
-			evt.putAll(evt);
-			return evt;
+			return new Event(entry, datetimeLabel);
 		}
 
 		public static Function<DFRow, Event> parseEventMapper(String dateLabel, String timeLabel, String pattern) {
@@ -188,15 +183,18 @@ public class UtilitiesIOMapping {
 			return entry -> parseEvent(entry, dateLabel, timeLabel, unixtime);
 		}
 
+		// FIXME use two columns
 		public static Event parseEvent(DFRow entry, String dateLabel, String timeLabel,
 				BiFunction<String, String, Long> unixtime) {
-			String date = entry.getString(dateLabel);
-			String time = entry.getString(timeLabel);
-			Instant unixtime_ = Instant.ofEpochMilli(unixtime.apply(date, time));
-			Event evt = new Event(unixtime_);
-			entry = entry.remove(dateLabel, timeLabel);
-			evt.putAll(evt);
-			return evt;
+			// String date = entry.getString(dateLabel);
+			// String time = entry.getString(timeLabel);
+			// Instant unixtime_ = Instant.ofEpochMilli(unixtime.apply(date,
+			// time));
+			// Event evt = new Event(unixtime_);
+			// entry = entry.remove(dateLabel, timeLabel);
+			// evt.putAll(evt);
+			// return evt;
+			return null;
 		}
 
 	}

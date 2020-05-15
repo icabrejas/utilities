@@ -1,5 +1,7 @@
 package org.utilities.symbolicmath.symbol;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -20,6 +22,11 @@ public interface Symbol<S, V> extends Function<S, V>, Pipeable<Symbol<S, V>> {
 
 	static <S, V> Symbol<S, V> as(Function<S, V> func) {
 		return func::apply;
+	}
+
+	// FIXME remove this method
+	default List<Symbol<S, ?>> dependencies() {
+		return Collections.emptyList();
 	}
 
 	@Override

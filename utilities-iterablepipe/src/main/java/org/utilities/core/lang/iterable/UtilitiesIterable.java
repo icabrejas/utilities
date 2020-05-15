@@ -7,14 +7,14 @@ import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-import org.utilities.core.util.function.BiFunctionPlus;
+import org.utilities.core.UtilitiesBiFunction;
 import org.utilities.core.util.pair.Pair;
 
 public class UtilitiesIterable {
 
 	public static <T, U, R> IterablePipe<R> apply(Iterable<T> x, Iterable<U> y, BiFunction<T, U, R> func) {
 		return IterablePipePair.from(x, y)
-				.map(BiFunctionPlus.parseFunction(func));
+				.map(UtilitiesBiFunction.parseFunction(func));
 	}
 
 	public static <T, U, R> IterablePipe<R> apply(Iterable<T> x, Function<T, R> func) {

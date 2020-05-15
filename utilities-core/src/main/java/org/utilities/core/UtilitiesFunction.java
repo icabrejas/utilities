@@ -38,6 +38,10 @@ public class UtilitiesFunction {
 		return t != null ? function.apply(t) : null;
 	}
 
+	public static <T, U, R> FunctionPlus<T, R> compose(Function<U, R> after, Function<T, U> before) {
+		return after.compose(before)::apply;
+	}
+
 	public static <T, R> Function<T, R> parseQuiet(Noisy<T, R> noisy) {
 		return t -> {
 			try {
